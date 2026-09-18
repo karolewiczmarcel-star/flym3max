@@ -11,69 +11,147 @@ local rootPart = character:WaitForChild("HumanoidRootPart")
 local camera = workspace.CurrentCamera
 
 local flying = false
+local noclip = false
 local flySpeed = 60
 local bodyVelocity
 
 ------------------------------------------------------------
--- 📦 GUI
+-- 🎨 KOLOROWE GUI - NiggaDestroyer 🔥
 ------------------------------------------------------------
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FlyGui"
+screenGui.Name = "NiggaDestroyerGui"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 240, 0, 180)
-frame.Position = UDim2.new(0, 20, 0, 150)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.Size = UDim2.new(0, 260, 0, 290)
+frame.Position = UDim2.new(0, 20, 0, 100)
+frame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 frame.BorderSizePixel = 0
-frame.Visible = false
 frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
+-- 🔥 Gradient tła (ciemny fiolet -> czerń)
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 0, 120)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(40, 0, 60)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 0, 25))
+})
+gradient.Rotation = 45
+gradient.Parent = frame
+
+-- 🔥 Tytuł z efektem
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 30)
+title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundTransparency = 1
-title.Text = "🛩️ Fly v3"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 18
+title.Text = "🔥 NiggaDestroyer 🔥"
+title.TextColor3 = Color3.fromRGB(255, 100, 0)
+title.TextStrokeColor3 = Color3.fromRGB(150, 0, 0)
+title.TextStrokeTransparency = 0
+title.TextSize = 22
 title.Font = Enum.Font.GothamBold
 title.Parent = frame
 
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0.8, 0, 0, 35)
-toggleButton.Position = UDim2.new(0.1, 0, 0, 35)
-toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.Font = Enum.Font.Gotham
-toggleButton.TextSize = 14
-toggleButton.Text = "Fly: OFF"
-toggleButton.Parent = frame
-Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 6)
+local titleGradient = Instance.new("UIGradient")
+titleGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 200, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 100, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 50, 0))
+})
+titleGradient.Parent = title
 
+-- ✨ Funkcja tworzenia przycisku z gradientem
+local function makeButton(name, text, yPos, color1, color2)
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Size = UDim2.new(0.85, 0, 0, 38)
+    btn.Position = UDim2.new(0.075, 0, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 15
+    btn.Text = text
+    btn.AutoButtonColor = true
+    btn.Parent = frame
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    
+    local grad = Instance.new("UIGradient")
+    grad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, color1),
+        ColorSequenceKeypoint.new(1, color2)
+    })
+    grad.Rotation = 90
+    grad.Parent = btn
+    
+    return btn
+end
+
+-- 🛩️ Fly button (gradient czerwono-pomarańczowy)
+local flyButton = makeButton("FlyButton", "🔥 Fly: OFF", 50,
+    Color3.fromRGB(180, 30, 30), Color3.fromRGB(100, 10, 10))
+
+-- 🚪 Noclip button (gradient żółto-pomarańczowy)
+local noclipButton = makeButton("NoclipButton", "⚡ Noclip: OFF", 100,
+    Color3.fromRGB(200, 130, 0), Color3.fromRGB(120, 70, 0))
+
+-- Speed label z emotką
 local speedLabel = Instance.new("TextLabel")
-speedLabel.Size = UDim2.new(0.8, 0, 0, 20)
-speedLabel.Position = UDim2.new(0.1, 0, 0, 80)
+speedLabel.Size = UDim2.new(0.85, 0, 0, 22)
+speedLabel.Position = UDim2.new(0.075, 0, 0, 155)
 speedLabel.BackgroundTransparency = 1
-speedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-speedLabel.Text = "Speed: 60"
-speedLabel.TextSize = 14
-speedLabel.Font = Enum.Font.Gotham
+speedLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+speedLabel.Text = "⚡ Speed: 60"
+speedLabel.TextSize = 15
+speedLabel.Font = Enum.Font.GothamBold
 speedLabel.Parent = frame
 
+-- 🎚️ Slider (gradient niebiesko-fioletowy)
 local sliderBack = Instance.new("Frame")
-sliderBack.Size = UDim2.new(0.8, 0, 0, 10)
-sliderBack.Position = UDim2.new(0.1, 0, 0, 110)
-sliderBack.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+sliderBack.Size = UDim2.new(0.85, 0, 0, 12)
+sliderBack.Position = UDim2.new(0.075, 0, 0, 185)
+sliderBack.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 sliderBack.Parent = frame
-Instance.new("UICorner", sliderBack).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", sliderBack).CornerRadius = UDim.new(0, 6)
 
 local sliderFill = Instance.new("Frame")
 sliderFill.Size = UDim2.new(0.3, 0, 1, 0)
-sliderFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 sliderFill.Parent = sliderBack
-Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(0, 6)
 
+local sliderGradient = Instance.new("UIGradient")
+sliderGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 200, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 0, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 150))
+})
+sliderGradient.Parent = sliderFill
+
+-- 📊 Info label (status)
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(0.85, 0, 0, 30)
+statusLabel.Position = UDim2.new(0.075, 0, 0, 215)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+statusLabel.Text = "💀 Ready to destroy 💀"
+statusLabel.TextSize = 12
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.Parent = frame
+
+-- 📝 Stopka
+local footer = Instance.new("TextLabel")
+footer.Size = UDim2.new(1, 0, 0, 20)
+footer.Position = UDim2.new(0, 0, 1, -22)
+footer.BackgroundTransparency = 1
+footer.TextColor3 = Color3.fromRGB(150, 50, 200)
+footer.Text = "⚡ Press P to toggle ⚡"
+footer.TextSize = 11
+footer.Font = Enum.Font.GothamBold
+footer.Parent = frame
+
+------------------------------------------------------------
+-- 🖱️ SLIDER LOGIC
+------------------------------------------------------------
 local dragging = false
 sliderBack.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
@@ -97,39 +175,69 @@ UserInputService.InputChanged:Connect(function(input)
         local ratio = math.clamp((mouseX - absPos) / absSize, 0, 1)
         sliderFill.Size = UDim2.new(ratio, 0, 1, 0)
         flySpeed = math.floor(20 + ratio * 180)
-        speedLabel.Text = "Speed: " .. flySpeed
+        speedLabel.Text = "⚡ Speed: " .. flySpeed
     end
 end)
 
 ------------------------------------------------------------
--- 🛩️ START / STOP
+-- 🛩️ FLY LOGIC
 ------------------------------------------------------------
 local function startFlying()
+    if flying then return end
     flying = true
     humanoid.PlatformStand = true
-    toggleButton.Text = "Fly: ON"
-    toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
+    flyButton.Text = "🔥 Fly: ON"
+    statusLabel.Text = "✈️ Flying like a god ✈️"
 
+    if bodyVelocity then bodyVelocity:Destroy() end
     bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.P = 1250
     bodyVelocity.Parent = rootPart
 end
 
 local function stopFlying()
+    if not flying then return end
     flying = false
     humanoid.PlatformStand = false
-    toggleButton.Text = "Fly: OFF"
-    toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    if bodyVelocity then bodyVelocity:Destroy() end
+    flyButton.Text = "🔥 Fly: OFF"
+    if not noclip then
+        statusLabel.Text = "💀 Ready to destroy 💀"
+    else
+        statusLabel.Text = "⚡ Noclip active ⚡"
+    end
+    if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
 end
 
-toggleButton.MouseButton1Click:Connect(function()
+flyButton.MouseButton1Click:Connect(function()
     if flying then stopFlying() else startFlying() end
 end)
 
 ------------------------------------------------------------
--- ⌨️ KLAWISZ P - GUI
+-- 🚪 NOCLIP LOGIC
+------------------------------------------------------------
+local function setNoclip(state)
+    noclip = state
+    if noclip then
+        noclipButton.Text = "⚡ Noclip: ON"
+        statusLabel.Text = "⚡ Noclip active ⚡"
+    else
+        noclipButton.Text = "⚡ Noclip: OFF"
+        if flying then
+            statusLabel.Text = "✈️ Flying like a god ✈️"
+        else
+            statusLabel.Text = "💀 Ready to destroy 💀"
+        end
+    end
+end
+
+noclipButton.MouseButton1Click:Connect(function()
+    setNoclip(not noclip)
+end)
+
+------------------------------------------------------------
+-- ⌨️ TOGGLE GUI
 ------------------------------------------------------------
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -139,40 +247,51 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 end)
 
 ------------------------------------------------------------
--- 🎮 PEŁNA KONTROLA OBRACANIA + LOTU
+-- 🔄 RESPAWN
 ------------------------------------------------------------
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = newCharacter:WaitForChild("Humanoid")
+    rootPart = newCharacter:WaitForChild("HumanoidRootPart")
+    if flying then
+        flying = false
+        flyButton.Text = "🔥 Fly: OFF"
+        bodyVelocity = nil
+    end
+    if noclip then setNoclip(false) end
+end)
+
+------------------------------------------------------------
+-- 🎮 MOVEMENT + NOCLIP
+------------------------------------------------------------
+RunService.Stepped:Connect(function()
+    if noclip and character then
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
 RunService.RenderStepped:Connect(function()
     if not flying then return end
-
-    -- 🌀 Postać ZAWSZE obraca się jak kamera
-    -- (nawet głową w dół, bokiem itd.)
     rootPart.CFrame = CFrame.new(rootPart.Position) * (camera.CFrame - camera.CFrame.Position)
 
-    -- Sterowanie ruchem — DOKŁADNIE w kierunku kamery
     local moveDirection = Vector3.new(0, 0, 0)
-
     if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-        moveDirection = moveDirection + camera.CFrame.LookVector
-    end
+        moveDirection = moveDirection + camera.CFrame.LookVector end
     if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-        moveDirection = moveDirection - camera.CFrame.LookVector
-    end
+        moveDirection = moveDirection - camera.CFrame.LookVector end
     if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-        moveDirection = moveDirection - camera.CFrame.RightVector
-    end
+        moveDirection = moveDirection - camera.CFrame.RightVector end
     if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-        moveDirection = moveDirection + camera.CFrame.RightVector
-    end
+        moveDirection = moveDirection + camera.CFrame.RightVector end
     if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-        moveDirection = moveDirection + Vector3.new(0, 1, 0)
-    end
+        moveDirection = moveDirection + Vector3.new(0, 1, 0) end
     if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-        moveDirection = moveDirection - Vector3.new(0, 1, 0)
-    end
+        moveDirection = moveDirection - Vector3.new(0, 1, 0) end
 
-    if moveDirection.Magnitude > 0 then
-        moveDirection = moveDirection.Unit
-    end
-
+    if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit end
     bodyVelocity.Velocity = moveDirection * flySpeed
 end)
