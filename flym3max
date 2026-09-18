@@ -1,4 +1,4 @@
--- NiggaDestroyer GUI v2 - NA PEWNO DZIAŁA
+-- Wklej do StarterPlayerScripts jako LocalScript
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -15,253 +15,185 @@ local noclip = false
 local flySpeed = 60
 local bodyVelocity
 
-------------------------------------------------------------
--- 🛑 NAJPIERW USUŃ STARE GUI (jeśli istnieje)
-------------------------------------------------------------
-if playerGui:FindFirstChild("FlyGui") then
-    playerGui.FlyGui:Destroy()
-end
-if playerGui:FindFirstChild("NiggaDestroyerGui") then
-    playerGui.NiggaDestroyerGui:Destroy()
+-- Usuń stare GUI żeby się nie nakładały
+for _, gui in pairs(playerGui:GetChildren()) do
+    if gui:IsA("ScreenGui") then gui:Destroy() end
 end
 
-------------------------------------------------------------
--- 🎨 TWORZENIE NOWEGO GUI
-------------------------------------------------------------
+-- Tworzenie GUI
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "NiggaDestroyerGui"
+screenGui.Name = "FlyNoclipGui"
 screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
 local frame = Instance.new("Frame")
-frame.Name = "Main"
-frame.Size = UDim2.new(0, 280, 0, 310)
-frame.Position = UDim2.new(0, 20, 0, 100)
-frame.BackgroundColor3 = Color3.fromRGB(20, 0, 30)
+frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Position = UDim2.new(0, 20, 0, 200)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BorderSizePixel = 0
 frame.Visible = false
 frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
 
--- ✨ GRADIENT TŁA (fioletowo-czarny)
-local bgGradient = Instance.new("UIGradient")
-bgGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 0, 180)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(50, 0, 80)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 0, 30))
-})
-bgGradient.Rotation = 45
-bgGradient.Parent = frame
+-- Przycisk Fly
+local flyButton = Instance.new("TextButton")
+flyButton.Size = UDim2.new(0.8, 0, 0, 40)
+flyButton.Position = UDim2.new(0.1, 0, 0, 15)
+flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyButton.Font = Enum.Font.Gotham
+flyButton.TextSize = 16
+flyButton.Text = "Fly: OFF"
+flyButton.Parent = frame
+Instance.new("UICorner", flyButton).CornerRadius = UDim.new(0, 6)
 
--- 🔥 TYTUŁ
-local title = Instance.new("TextLabel")
-title.Name = "Title"
-title.Size = UDim2.new(1, -20, 0, 45)
-title.Position = UDim2.new(0, 10, 0, 5)
-title.BackgroundTransparency = 1
-title.Text = "🔥 NiggaDestroyer 🔥"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextStrokeColor3 = Color3.fromRGB(200, 50, 0)
-title.TextStrokeTransparency = 0
-title.TextSize = 24
-title.Font = Enum.Font.GothamBold
-title.Parent = frame
+-- Przycisk Noclip
+local noclipButton = Instance.new("TextButton")
+noclipButton.Size = UDim2.new(0.8, 0, 0, 40)
+noclipButton.Position = UDim2.new(0.1, 0, 0, 65)
+noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+noclipButton.Font = Enum.Font.Gotham
+noclipButton.TextSize = 16
+noclipButton.Text = "Noclip: OFF"
+noclipButton.Parent = frame
+Instance.new("UICorner", noclipButton).CornerRadius = UDim.new(0, 6)
 
-local titleGrad = Instance.new("UIGradient")
-titleGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 220, 0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 100, 0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 30, 0))
-})
-titleGrad.Parent = title
-
-------------------------------------------------------------
--- 🛠️ FUNKCJA DO PRZYCISKÓW
-------------------------------------------------------------
-local function makeButton(name, text, yPos, gradColor1, gradColor2)
-    local btn = Instance.new("TextButton")
-    btn.Name = name
-    btn.Size = UDim2.new(0.85, 0, 0, 42)
-    btn.Position = UDim2.new(0.075, 0, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 16
-    btn.Text = text
-    btn.AutoButtonColor = true
-    btn.Parent = frame
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-    
-    local g = Instance.new("UIGradient")
-    g.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, gradColor1),
-        ColorSequenceKeypoint.new(1, gradColor2)
-    })
-    g.Rotation = 90
-    g.Parent = btn
-    return btn
-end
-
--- 🛩️ FLY
-local flyButton = makeButton("FlyBtn", "🔥 Fly: OFF", 60,
-    Color3.fromRGB(220, 40, 40),
-    Color3.fromRGB(120, 10, 10))
-
--- ⚡ NOCLIP
-local noclipButton = makeButton("NoclipBtn", "⚡ Noclip: OFF", 115,
-    Color3.fromRGB(230, 150, 0),
-    Color3.fromRGB(140, 80, 0))
-
-------------------------------------------------------------
--- 📏 SPEED LABEL + SLIDER
-------------------------------------------------------------
-local speedLabel = Instance.new("TextLabel")
-speedLabel.Name = "SpeedLabel"
-speedLabel.Size = UDim2.new(0.85, 0, 0, 25)
-speedLabel.Position = UDim2.new(0.075, 0, 0, 175)
-speedLabel.BackgroundTransparency = 1
-speedLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-speedLabel.Text = "⚡ Speed: 60"
-speedLabel.TextSize = 16
-speedLabel.Font = Enum.Font.GothamBold
+-- Etykieta prędkości (kliknij aby zmienić)
+local speedLabel = Instance.new("TextButton")
+speedLabel.Size = UDim2.new(0.8, 0, 0, 30)
+speedLabel.Position = UDim2.new(0.1, 0, 0, 115)
+speedLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.Font = Enum.Font.Gotham
+speedLabel.TextSize = 14
+speedLabel.Text = "Speed: 60"
 speedLabel.Parent = frame
+Instance.new("UICorner", speedLabel).CornerRadius = UDim.new(0, 6)
 
-local sliderBack = Instance.new("Frame")
-sliderBack.Name = "SliderBack"
-sliderBack.Size = UDim2.new(0.85, 0, 0, 14)
-sliderBack.Position = UDim2.new(0.075, 0, 0, 210)
-sliderBack.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-sliderBack.Parent = frame
-Instance.new("UICorner", sliderBack).CornerRadius = UDim.new(0, 7)
-
-local sliderFill = Instance.new("Frame")
-sliderFill.Name = "SliderFill"
-sliderFill.Size = UDim2.new(0.3, 0, 1, 0)
-sliderFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-sliderFill.Parent = sliderBack
-Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(0, 7)
-
-local sliderGrad = Instance.new("UIGradient")
-sliderGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 220, 255)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 0, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 180))
-})
-sliderGrad.Parent = sliderFill
-
-------------------------------------------------------------
--- 💬 STATUS
-------------------------------------------------------------
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Name = "Status"
-statusLabel.Size = UDim2.new(0.85, 0, 0, 30)
-statusLabel.Position = UDim2.new(0.075, 0, 0, 240)
-statusLabel.BackgroundTransparency = 1
-statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-statusLabel.Text = "💀 Ready to destroy 💀"
-statusLabel.TextSize = 13
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.Parent = frame
-
-local footer = Instance.new("TextLabel")
-footer.Name = "Footer"
-footer.Size = UDim2.new(1, 0, 0, 22)
-footer.Position = UDim2.new(0, 0, 1, -25)
-footer.BackgroundTransparency = 1
-footer.TextColor3 = Color3.fromRGB(180, 80, 220)
-footer.Text = "⚡ Press P to toggle menu ⚡"
-footer.TextSize = 12
-footer.Font = Enum.Font.GothamBold
-footer.Parent = frame
-
-------------------------------------------------------------
--- 🖱️ SLIDER LOGIC
-------------------------------------------------------------
-local dragging = false
-sliderBack.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-    or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-    end
-end)
-sliderBack.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-    or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
+-- Pokaż/ukryj GUI klawiszem P
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.P then
+        frame.Visible = not frame.Visible
     end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
-    or input.UserInputType == Enum.UserInputType.Touch) then
-        local absPos = sliderBack.AbsolutePosition.X
-        local absSize = sliderBack.AbsoluteSize.X
-        local mouseX = input.Position.X
-        local ratio = math.clamp((mouseX - absPos) / absSize, 0, 1)
-        sliderFill.Size = UDim2.new(ratio, 0, 1, 0)
-        flySpeed = math.floor(20 + ratio * 180)
-        speedLabel.Text = "⚡ Speed: " .. flySpeed
-    end
-end)
-
-------------------------------------------------------------
--- 🛩️ FLY LOGIC
-------------------------------------------------------------
-local function updateStatus()
-    if flying and noclip then
-        statusLabel.Text = "🔥🔥 FULL POWER MODE 🔥🔥"
-    elseif flying then
-        statusLabel.Text = "✈️ Flying like a god ✈️"
-    elseif noclip then
-        statusLabel.Text = "⚡ Noclip active ⚡"
-    else
-        statusLabel.Text = "💀 Ready to destroy 💀"
-    end
-end
-
-local function startFlying()
+-- Funkcja startu lotu
+local function startFly()
     if flying then return end
     flying = true
     humanoid.PlatformStand = true
-    flyButton.Text = "🔥 Fly: ON"
+    flyButton.Text = "Fly: ON"
+    flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
+    
     if bodyVelocity then bodyVelocity:Destroy() end
     bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
     bodyVelocity.P = 1250
     bodyVelocity.Parent = rootPart
-    updateStatus()
 end
 
-local function stopFlying()
+-- Funkcja zatrzymania lotu
+local function stopFly()
     if not flying then return end
     flying = false
     humanoid.PlatformStand = false
-    flyButton.Text = "🔥 Fly: OFF"
-    if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
-    updateStatus()
+    flyButton.Text = "Fly: OFF"
+    flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+        bodyVelocity = nil
+    end
 end
 
+-- Kliknięcie przycisku Fly
 flyButton.MouseButton1Click:Connect(function()
-    if flying then stopFlying() else startFlying() end
+    if flying then stopFly() else startFly() end
 end)
 
-------------------------------------------------------------
--- ⚡ NOCLIP LOGIC
-------------------------------------------------------------
+-- Kliknięcie przycisku Noclip
 noclipButton.MouseButton1Click:Connect(function()
     noclip = not noclip
     if noclip then
-        noclipButton.Text = "⚡ Noclip: ON"
+        noclipButton.Text = "Noclip: ON"
+        noclipButton.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
     else
-        noclipButton.Text = "⚡ Noclip: OFF"
+        noclipButton.Text = "Noclip: OFF"
+        noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     end
-    updateStatus()
 end)
 
-------------------------------------------------------------
--- ⌨️ TOGGLE GUI
-------------------------------------------------------------
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return
+-- Zmiana prędkości (cyklicznie 30, 60, 100, 150, 200)
+local speeds = {30, 60, 100, 150, 200}
+local speedIndex = 2
+speedLabel.MouseButton1Click:Connect(function()
+    speedIndex = speedIndex + 1
+    if speedIndex > #speeds then speedIndex = 1 end
+    flySpeed = speeds[speedIndex]
+    speedLabel.Text = "Speed: " .. flySpeed
+end)
+
+-- Respawn - reset
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    humanoid = newChar:WaitForChild("Humanoid")
+    rootPart = newChar:WaitForChild("HumanoidRootPart")
+    if flying then
+        flying = false
+        flyButton.Text = "Fly: OFF"
+        flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        bodyVelocity = nil
+    end
+    noclip = false
+    noclipButton.Text = "Noclip: OFF"
+    noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+end)
+
+-- Noclip - wyłączanie kolizji
+RunService.Stepped:Connect(function()
+    if noclip and character then
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- Ruch podczas lotu
+RunService.RenderStepped:Connect(function()
+    if not flying then return end
+    
+    -- Postać obraca się jak kamera
+    rootPart.CFrame = CFrame.new(rootPart.Position) * (camera.CFrame - camera.CFrame.Position)
+    
+    local moveDirection = Vector3.new(0, 0, 0)
+    
+    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+        moveDirection = moveDirection + camera.CFrame.LookVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+        moveDirection = moveDirection - camera.CFrame.LookVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+        moveDirection = moveDirection - camera.CFrame.RightVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+        moveDirection = moveDirection + camera.CFrame.RightVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+        moveDirection = moveDirection + Vector3.new(0, 1, 0)
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+        moveDirection = moveDirection - Vector3.new(0, 1, 0)
+    end
+    
+    if moveDirection.Magnitude > 0 then
+        moveDirection = moveDirection.Unit
+    end
+    
+    bodyVelocity.Velocity = moveDirection * flySpeed
+end)
