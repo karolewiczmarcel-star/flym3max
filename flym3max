@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 (Płynny Fly na CFrame)
+-- Fly + Noclip + ESP MM2 (Z rotacją w stronę kamery)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -80,7 +80,7 @@ sf.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 sf.BorderSizePixel = 0
 sf.Parent = sb
 
--- Ukrywanie okna (P)
+-- Ukrywanie okna (klawisz P)
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
@@ -106,7 +106,7 @@ uis.InputChanged:Connect(function(i)
 end)
 
 ------------------------------------------------------------
--- FLY (PŁYNNY NA CFRAME)
+-- FLY (PŁYNNY + ROTACJA DO KAMERY)
 ------------------------------------------------------------
 b1.MouseButton1Click:Connect(function()
     flying = not flying
@@ -137,15 +137,19 @@ runService.RenderStepped:Connect(function(dt)
         if uis:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
         if uis:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
 
+        local nextPos = hrp.Position
         if moveDir.Magnitude > 0 then
-            hrp.CFrame = hrp.CFrame + (moveDir.Unit * speed * dt)
+            nextPos = hrp.Position + (moveDir.Unit * speed * dt)
         end
+
+        -- Ustawienie pozycji ORAZ rotacji w stronę, w którą patrzy kamera
+        hrp.CFrame = CFrame.new(nextPos, nextPos + cam.CFrame.LookVector)
         hrp.Velocity = Vector3.new(0, 0, 0)
     end
 end)
 
 ------------------------------------------------------------
--- NOCLIP
+-- NOCLIP (PRZECHODZENIE PRZEZ ŚCIANY)
 ------------------------------------------------------------
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
@@ -169,7 +173,7 @@ runService.Stepped:Connect(function()
 end)
 
 ------------------------------------------------------------
--- ESP MM2
+-- ESP MM2 (WYKRYWANIE RÓL)
 ------------------------------------------------------------
 local function getRole(player)
     if not player.Character then return "Innocent" end
