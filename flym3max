@@ -1,199 +1,260 @@
--- Wklej do StarterPlayerScripts jako LocalScript
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
+-- Fly + Noclip - GUI pod P + suwak predkosci
+local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 local flying = false
 local noclip = false
-local flySpeed = 60
-local bodyVelocity
+local speed = 60
+local fly = nil
 
--- Usuń stare GUI żeby się nie nakładały
-for _, gui in pairs(playerGui:GetChildren()) do
-    if gui:IsA("ScreenGui") then gui:Destroy() end
-end
-
--- Tworzenie GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FlyNoclipGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 150)
-frame.Position = UDim2.new(0, 20, 0, 200)
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-frame.BorderSizePixel = 0
-frame.Visible = false
-frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
-
--- Przycisk Fly
-local flyButton = Instance.new("TextButton")
-flyButton.Size = UDim2.new(0.8, 0, 0, 40)
-flyButton.Position = UDim2.new(0.1, 0, 0, 15)
-flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyButton.Font = Enum.Font.Gotham
-flyButton.TextSize = 16
-flyButton.Text = "Fly: OFF"
-flyButton.Parent = frame
-Instance.new("UICorner", flyButton).CornerRadius = UDim.new(0, 6)
-
--- Przycisk Noclip
-local noclipButton = Instance.new("TextButton")
-noclipButton.Size = UDim2.new(0.8, 0, 0, 40)
-noclipButton.Position = UDim2.new(0.1, 0, 0, 65)
-noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-noclipButton.Font = Enum.Font.Gotham
-noclipButton.TextSize = 16
-noclipButton.Text = "Noclip: OFF"
-noclipButton.Parent = frame
-Instance.new("UICorner", noclipButton).CornerRadius = UDim.new(0, 6)
-
--- Etykieta prędkości (kliknij aby zmienić)
-local speedLabel = Instance.new("TextButton")
-speedLabel.Size = UDim2.new(0.8, 0, 0, 30)
-speedLabel.Position = UDim2.new(0.1, 0, 0, 115)
-speedLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedLabel.Font = Enum.Font.Gotham
-speedLabel.TextSize = 14
-speedLabel.Text = "Speed: 60"
-speedLabel.Parent = frame
-Instance.new("UICorner", speedLabel).CornerRadius = UDim.new(0, 6)
-
--- Pokaż/ukryj GUI klawiszem P
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.P then
-        frame.Visible = not frame.Visible
-    end
-end)
-
--- Funkcja startu lotu
-local function startFly()
-    if flying then return end
-    flying = true
-    humanoid.PlatformStand = true
-    flyButton.Text = "Fly: ON"
-    flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
-    
-    if bodyVelocity then bodyVelocity:Destroy() end
-    bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    bodyVelocity.P = 1250
-    bodyVelocity.Parent = rootPart
-end
-
--- Funkcja zatrzymania lotu
-local function stopFly()
-    if not flying then return end
-    flying = false
-    humanoid.PlatformStand = false
-    flyButton.Text = "Fly: OFF"
-    flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    
-    if bodyVelocity then
-        bodyVelocity:Destroy()
-        bodyVelocity = nil
-    end
-end
-
--- Kliknięcie przycisku Fly
-flyButton.MouseButton1Click:Connect(function()
-    if flying then stopFly() else startFly() end
-end)
-
--- Kliknięcie przycisku Noclip
-noclipButton.MouseButton1Click:Connect(function()
-    noclip = not noclip
-    if noclip then
-        noclipButton.Text = "Noclip: ON"
-        noclipButton.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
-    else
-        noclipButton.Text = "Noclip: OFF"
-        noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    end
-end)
-
--- Zmiana prędkości (cyklicznie 30, 60, 100, 150, 200)
-local speeds = {30, 60, 100, 150, 200}
-local speedIndex = 2
-speedLabel.MouseButton1Click:Connect(function()
-    speedIndex = speedIndex + 1
-    if speedIndex > #speeds then speedIndex = 1 end
-    flySpeed = speeds[speedIndex]
-    speedLabel.Text = "Speed: " .. flySpeed
-end)
-
--- Respawn - reset
-player.CharacterAdded:Connect(function(newChar)
-    character = newChar
-    humanoid = newChar:WaitForChild("Humanoid")
-    rootPart = newChar:WaitForChild("HumanoidRootPart")
-    if flying then
-        flying = false
-        flyButton.Text = "Fly: OFF"
-        flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        bodyVelocity = nil
-    end
-    noclip = false
-    noclipButton.Text = "Noclip: OFF"
-    noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-end)
-
--- Noclip - wyłączanie kolizji
-RunService.Stepped:Connect(function()
-    if noclip and character then
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
+------------------------------------------------------------
+-- 🛑 ZABEZPIECZENIA
+------------------------------------------------------------
+pcall(function()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        for _,v in pairs(player.Character:GetDescendants()) do
+            if v:IsA("BasePart") then v.CanCollide = true end
         end
     end
 end)
 
--- Ruch podczas lotu
-RunService.RenderStepped:Connect(function()
-    if not flying then return end
-    
-    -- Postać obraca się jak kamera
-    rootPart.CFrame = CFrame.new(rootPart.Position) * (camera.CFrame - camera.CFrame.Position)
-    
-    local moveDirection = Vector3.new(0, 0, 0)
-    
-    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-        moveDirection = moveDirection + camera.CFrame.LookVector
+pcall(function()
+    if game.CoreGui:FindFirstChild("FlyGui") then
+        game.CoreGui.FlyGui:Destroy()
     end
-    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-        moveDirection = moveDirection - camera.CFrame.LookVector
-    end
-    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-        moveDirection = moveDirection - camera.CFrame.RightVector
-    end
-    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-        moveDirection = moveDirection + camera.CFrame.RightVector
-    end
-    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-        moveDirection = moveDirection + Vector3.new(0, 1, 0)
-    end
-    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-        moveDirection = moveDirection - Vector3.new(0, 1, 0)
-    end
-    
-    if moveDirection.Magnitude > 0 then
-        moveDirection = moveDirection.Unit
-    end
-    
-    bodyVelocity.Velocity = moveDirection * flySpeed
 end)
+
+------------------------------------------------------------
+-- 🎨 GUI
+------------------------------------------------------------
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "FlyGui"
+ScreenGui.ResetOnSpawn = false
+pcall(function() ScreenGui.Parent = game.CoreGui end)
+if not ScreenGui.Parent then ScreenGui.Parent = player:WaitForChild("PlayerGui") end
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 200, 0, 190)
+Frame.Position = UDim2.new(0, 20, 0, 200)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+Frame.Visible = false
+Frame.Parent = ScreenGui
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
+
+-- Przycisk Fly
+local FlyBtn = Instance.new("TextButton")
+FlyBtn.Size = UDim2.new(0.85, 0, 0, 35)
+FlyBtn.Position = UDim2.new(0.075, 0, 0, 15)
+FlyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyBtn.Font = Enum.Font.Gotham
+FlyBtn.TextSize = 15
+FlyBtn.Text = "Fly: OFF"
+FlyBtn.Parent = Frame
+Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 6)
+
+-- Przycisk Noclip
+local NoclipBtn = Instance.new("TextButton")
+NoclipBtn.Size = UDim2.new(0.85, 0, 0, 35)
+NoclipBtn.Position = UDim2.new(0.075, 0, 0, 60)
+NoclipBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+NoclipBtn.Font = Enum.Font.Gotham
+NoclipBtn.TextSize = 15
+NoclipBtn.Text = "Noclip: OFF"
+NoclipBtn.Parent = Frame
+Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 6)
+
+-- Etykieta prędkości
+local SpeedLabel = Instance.new("TextLabel")
+SpeedLabel.Size = UDim2.new(0.85, 0, 0, 20)
+SpeedLabel.Position = UDim2.new(0.075, 0, 0, 110)
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedLabel.Text = "Speed: 60"
+SpeedLabel.TextSize = 14
+SpeedLabel.Font = Enum.Font.Gotham
+SpeedLabel.Parent = Frame
+
+-- 🎚️ SUWAK (tło)
+local SliderBack = Instance.new("Frame")
+SliderBack.Size = UDim2.new(0.85, 0, 0, 12)
+SliderBack.Position = UDim2.new(0.075, 0, 0, 140)
+SliderBack.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+SliderBack.Parent = Frame
+Instance.new("UICorner", SliderBack).CornerRadius = UDim.new(0, 6)
+
+-- 🎚️ SUWAK (wypełnienie)
+local SliderFill = Instance.new("Frame")
+SliderFill.Size = UDim2.new(0.18, 0, 1, 0)  -- 60/300 ≈ 0.2
+SliderFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+SliderFill.Parent = SliderBack
+Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(0, 6)
+
+------------------------------------------------------------
+-- ⌨️ KLAWISZ P
+------------------------------------------------------------
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.P then
+        Frame.Visible = not Frame.Visible
+    end
+end)
+
+------------------------------------------------------------
+-- 🎚️ LOGIKA SUWAKA
+------------------------------------------------------------
+local dragging = false
+local minSpeed = 10
+local maxSpeed = 300
+
+local function updateSlider(input)
+    local absPos = SliderBack.AbsolutePosition.X
+    local absSize = SliderBack.AbsoluteSize.X
+    local mouseX = input.Position.X
+    local ratio = math.clamp((mouseX - absPos) / absSize, 0, 1)
+    SliderFill.Size = UDim2.new(ratio, 0, 1, 0)
+    speed = math.floor(minSpeed + ratio * (maxSpeed - minSpeed))
+    SpeedLabel.Text = "Speed: " .. speed
+end
+
+SliderBack.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        updateSlider(input)
+    end
+end)
+
+SliderBack.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+    or input.UserInputType == Enum.UserInputType.Touch) then
+        updateSlider(input)
+    end
+end)
+
+------------------------------------------------------------
+-- 🛩️ FLY
+------------------------------------------------------------
+local function StartFly()
+    if flying then return end
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+    if not player.Character:FindFirstChild("Humanoid") then return end
+    
+    flying = true
+    FlyBtn.Text = "Fly: ON"
+    FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
+    
+    local hrp = player.Character.HumanoidRootPart
+    local hum = player.Character.Humanoid
+    hum.PlatformStand = true
+    
+    fly = Instance.new("BodyVelocity")
+    fly.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    fly.Velocity = Vector3.new(0, 0, 0)
+    fly.P = 1250
+    fly.Parent = hrp
+end
+
+local function StopFly()
+    if not flying then return end
+    flying = false
+    FlyBtn.Text = "Fly: OFF"
+    FlyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.PlatformStand = false
+    end
+    
+    if fly then
+        fly:Destroy()
+        fly = nil
+    end
+end
+
+FlyBtn.MouseButton1Click:Connect(function()
+    if flying then StopFly() else StartFly() end
+end)
+
+------------------------------------------------------------
+-- ⚡ NOCLIP
+------------------------------------------------------------
+NoclipBtn.MouseButton1Click:Connect(function()
+    noclip = not noclip
+    if noclip then
+        NoclipBtn.Text = "Noclip: ON"
+        NoclipBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
+    else
+        NoclipBtn.Text = "Noclip: OFF"
+        NoclipBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+------------------------------------------------------------
+-- 🔄 RESPAWN
+------------------------------------------------------------
+player.CharacterAdded:Connect(function(char)
+    if flying then
+        StopFly()
+    end
+    if noclip then
+        noclip = false
+        NoclipBtn.Text = "Noclip: OFF"
+        NoclipBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+------------------------------------------------------------
+-- 🎮 GŁÓWNA PĘTLA
+------------------------------------------------------------
+game:GetService("RunService").Stepped:Connect(function()
+    if noclip and player.Character then
+        pcall(function()
+            for _, v in pairs(player.Character:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = false
+                end
+            end
+        end)
+    end
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if not flying then return end
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local hrp = player.Character.HumanoidRootPart
+    if not player.Character:FindFirstChild("Humanoid") then return end
+    
+    pcall(function()
+        hrp.CFrame = CFrame.new(hrp.Position) * (camera.CFrame - camera.CFrame.Position)
+    end)
+    
+    local dir = Vector3.new(0, 0, 0)
+    local uis = game:GetService("UserInputService")
+    
+    if uis:IsKeyDown(Enum.KeyCode.W) then dir = dir + camera.CFrame.LookVector end
+    if uis:IsKeyDown(Enum.KeyCode.S) then dir = dir - camera.CFrame.LookVector end
+    if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - camera.CFrame.RightVector end
+    if uis:IsKeyDown(Enum.KeyCode.D) then dir = dir + camera.CFrame.RightVector end
+    if uis:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+    if uis:IsKeyDown(Enum.KeyCode.LeftControl) then dir = dir - Vector3.new(0, 1, 0) end
+    
+    if dir.Magnitude > 0 then dir = dir.Unit end
+    
+    if fly then
+        fly.Velocity = dir * speed
+    end
+end)
+
+print("✅ Fly + Noclip zaladowany! Nacisnij P aby pokazac GUI.")
