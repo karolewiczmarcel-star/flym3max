@@ -1,4 +1,4 @@
--- Fly + Noclip - przesuwalne GUI + suwak
+-- Fly + Noclip v2 - na srodku ekranu
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 
@@ -7,99 +7,72 @@ local noclip = false
 local speed = 60
 local fly = nil
 
--- GUI
-local g = Instance.new("ScreenGui", game.CoreGui)
-g.Name = "FlyGui"
+-- Usun stare
+pcall(function()
+    if game.CoreGui:FindFirstChild("FlyGuiV2") then
+        game.CoreGui.FlyGuiV2:Destroy()
+    end
+end)
 
-local f = Instance.new("Frame", g)
+-- GUI
+local g = Instance.new("ScreenGui")
+g.Name = "FlyGuiV2"
+g.Parent = game.CoreGui
+
+local f = Instance.new("Frame")
 f.Size = UDim2.new(0, 180, 0, 170)
-f.Position = UDim2.new(0, 20, 0, 200)
+f.Position = UDim2.new(0.5, -90, 0.5, -85) -- ⬅ ŚRODEK EKRANU
 f.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 f.BorderSizePixel = 0
-f.Visible = false
+f.Active = true
+f.Visible = true -- ⬅ od razu widoczne
+f.Parent = g
 
--- Przyciski
-local b1 = Instance.new("TextButton", f)
+local b1 = Instance.new("TextButton")
 b1.Size = UDim2.new(0.8, 0, 0, 35)
 b1.Position = UDim2.new(0.1, 0, 0, 10)
 b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b1.TextColor3 = Color3.fromRGB(255, 255, 255)
-b1.Font = Enum.Font.Gotham
-b1.TextSize = 15
+b1.Font = 0 -- ⬅ Enum.Font.Legacy
+b1.TextSize = 18
 b1.Text = "Fly: OFF"
+b1.Parent = f
 
-local b2 = Instance.new("TextButton", f)
+local b2 = Instance.new("TextButton")
 b2.Size = UDim2.new(0.8, 0, 0, 35)
 b2.Position = UDim2.new(0.1, 0, 0, 50)
 b2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b2.TextColor3 = Color3.fromRGB(255, 255, 255)
-b2.Font = Enum.Font.Gotham
-b2.TextSize = 15
+b2.Font = 0
+b2.TextSize = 18
 b2.Text = "Noclip: OFF"
+b2.Parent = f
 
--- Suwak
-local sl = Instance.new("TextLabel", f)
+local sl = Instance.new("TextLabel")
 sl.Size = UDim2.new(0.8, 0, 0, 20)
 sl.Position = UDim2.new(0.1, 0, 0, 95)
 sl.BackgroundTransparency = 1
 sl.TextColor3 = Color3.fromRGB(200, 200, 200)
-sl.Font = Enum.Font.Gotham
+sl.Font = 0
 sl.TextSize = 14
 sl.Text = "Speed: 60"
+sl.Parent = f
 
-local sb = Instance.new("Frame", f)
+local sb = Instance.new("Frame")
 sb.Size = UDim2.new(0.8, 0, 0, 12)
 sb.Position = UDim2.new(0.1, 0, 0, 125)
 sb.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 sb.BorderSizePixel = 0
+sb.Parent = f
 
-local sf = Instance.new("Frame", sb)
+local sf = Instance.new("Frame")
 sf.Size = UDim2.new(0.18, 0, 1, 0)
 sf.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 sf.BorderSizePixel = 0
+sf.Parent = sb
 
-------------------------------------------------------------
--- 🖱️ PRZESUWANIE GUI (nie działa na suwak/przyciski)
-------------------------------------------------------------
-local draggingGui = false
-local dragStart, startPos
-
+-- P
 local uis = game:GetService("UserInputService")
-
-f.InputBegan:Connect(function(i)
-    if i.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-    -- Sprawdź czy klik nie jest na suwaku lub przycisku
-    local mouse = uis:GetMouseLocation()
-    if mouse.X >= sb.AbsolutePosition.X 
-    and mouse.X <= sb.AbsolutePosition.X + sb.AbsoluteSize.X
-    and mouse.Y >= sb.AbsolutePosition.Y 
-    and mouse.Y <= sb.AbsolutePosition.Y + sb.AbsoluteSize.Y then
-        return -- klik na suwak - nie ruszaj GUI
-    end
-    draggingGui = true
-    dragStart = i.Position
-    startPos = f.Position
-end)
-
-f.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingGui = false
-    end
-end)
-
-uis.InputChanged:Connect(function(i)
-    if draggingGui and i.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = i.Position - dragStart
-        f.Position = UDim2.new(
-            startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, startPos.Y.Offset + delta.Y
-        )
-    end
-end)
-
-------------------------------------------------------------
--- ⌨️ P - pokaż/ukryj
-------------------------------------------------------------
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
@@ -107,23 +80,16 @@ uis.InputBegan:Connect(function(i, gp)
     end
 end)
 
-------------------------------------------------------------
--- 🎚️ SUWAK (nie przesuwa GUI)
-------------------------------------------------------------
-local dragSlider = false
-
+-- Suwak
+local drag = false
 sb.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragSlider = true
-    end
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = true end
 end)
 sb.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragSlider = false
-    end
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = false end
 end)
 uis.InputChanged:Connect(function(i)
-    if dragSlider and i.UserInputType == Enum.UserInputType.MouseMovement then
+    if drag and i.UserInputType == Enum.UserInputType.MouseMovement then
         local r = math.clamp((i.Position.X - sb.AbsolutePosition.X) / sb.AbsoluteSize.X, 0, 1)
         sf.Size = UDim2.new(r, 0, 1, 0)
         speed = math.floor(10 + r * 290)
@@ -131,9 +97,7 @@ uis.InputChanged:Connect(function(i)
     end
 end)
 
-------------------------------------------------------------
--- 🛩️ FLY
-------------------------------------------------------------
+-- Fly
 b1.MouseButton1Click:Connect(function()
     if flying then
         flying = false
@@ -141,9 +105,11 @@ b1.MouseButton1Click:Connect(function()
         b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         if fly then fly:Destroy() end
         fly = nil
-        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character.Humanoid.PlatformStand = false
-        end
+        pcall(function()
+            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                plr.Character.Humanoid.PlatformStand = false
+            end
+        end)
     else
         if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
         flying = true
@@ -157,9 +123,7 @@ b1.MouseButton1Click:Connect(function()
     end
 end)
 
-------------------------------------------------------------
--- ⚡ NOCLIP
-------------------------------------------------------------
+-- Noclip
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
     if noclip then
@@ -171,9 +135,7 @@ b2.MouseButton1Click:Connect(function()
     end
 end)
 
-------------------------------------------------------------
--- 🔄 RESPAWN
-------------------------------------------------------------
+-- Respawn
 plr.CharacterAdded:Connect(function()
     if flying then
         flying = false
@@ -188,9 +150,7 @@ plr.CharacterAdded:Connect(function()
     end
 end)
 
-------------------------------------------------------------
--- 🎮 PĘTLE
-------------------------------------------------------------
+-- Petle
 game:GetService("RunService").Stepped:Connect(function()
     if noclip and plr.Character then
         for _, v in pairs(plr.Character:GetDescendants()) do
@@ -217,4 +177,4 @@ game:GetService("RunService").RenderStepped:Connect(function()
     fly.Velocity = d * speed
 end)
 
-print("OK - P otwiera GUI, kliknij tlo aby przesuwac")
+print("OK - GUI na srodku ekranu")
