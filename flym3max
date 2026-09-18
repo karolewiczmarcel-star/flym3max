@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 - POPRAWIONY I DZIAŁAJĄCY
+-- Fly + Noclip + ESP MM2 (Płynny Fly na CFrame)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -8,20 +8,13 @@ local flying = false
 local noclip = false
 local espEnabled = false
 local speed = 60
-local fly = nil
 
--- Wyczysc stare GUI i ESP
+-- Wyczysc stare GUI
 pcall(function()
     if game.CoreGui:FindFirstChild("FlyGuiMM2") then
         game.CoreGui.FlyGuiMM2:Destroy()
     end
 end)
-for _, player in pairs(game.Players:GetPlayers()) do
-    if player.Character and player.Character:FindFirstChild("Head") then
-        local bb = player.Character.Head:FindFirstChild("ESPLabel")
-        if bb then bb:Destroy() end
-    end
-end
 
 -- GUI
 local g = Instance.new("ScreenGui")
@@ -34,7 +27,7 @@ f.Position = UDim2.new(0.5, -90, 0.5, -100)
 f.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 f.BorderSizePixel = 0
 f.Active = true
-f.Draggable = true -- Dodana możliwość przeciągania okna
+f.Draggable = true
 f.Visible = true
 f.Parent = g
 
@@ -87,7 +80,7 @@ sf.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 sf.BorderSizePixel = 0
 sf.Parent = sb
 
--- Ukrywanie okna pod klawiszem P
+-- Ukrywanie okna (P)
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
@@ -95,7 +88,7 @@ uis.InputBegan:Connect(function(i, gp)
     end
 end)
 
--- Suwak prędkości
+-- Suwak predkosci
 local drag = false
 sb.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = true end
@@ -113,53 +106,46 @@ uis.InputChanged:Connect(function(i)
 end)
 
 ------------------------------------------------------------
--- LOGIKA FLY (Latanie)
+-- FLY (PŁYNNY NA CFRAME)
 ------------------------------------------------------------
 b1.MouseButton1Click:Connect(function()
     flying = not flying
     if flying then
         b1.Text = "Fly: ON"
         b1.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
-        
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            plr.Character.Humanoid.PlatformStand = true
-            
-            fly = Instance.new("BodyVelocity")
-            fly.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            fly.Velocity = Vector3.new(0, 0, 0)
-            fly.Parent = plr.Character.HumanoidRootPart
-        end
     else
         b1.Text = "Fly: OFF"
         b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        
-        if fly then fly:Destroy() end
-        fly = nil
-        
         if plr.Character and plr.Character:FindFirstChild("Humanoid") then
             plr.Character.Humanoid.PlatformStand = false
         end
     end
 end)
 
--- Sterowanie lataniem w każdej klatce
-runService.RenderStepped:Connect(function()
-    if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and fly then
+runService.RenderStepped:Connect(function(dt)
+    if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = plr.Character.HumanoidRootPart
+        local hum = plr.Character:FindFirstChild("Humanoid")
+        if hum then hum.PlatformStand = true end
+
         local moveDir = Vector3.new(0, 0, 0)
-        
+
         if uis:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
         if uis:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
         if uis:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
         if uis:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
         if uis:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
         if uis:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
-        
-        fly.Velocity = moveDir * speed
+
+        if moveDir.Magnitude > 0 then
+            hrp.CFrame = hrp.CFrame + (moveDir.Unit * speed * dt)
+        end
+        hrp.Velocity = Vector3.new(0, 0, 0)
     end
 end)
 
 ------------------------------------------------------------
--- LOGIKA NOCLIP (Przechodzenie przez ściany)
+-- NOCLIP
 ------------------------------------------------------------
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
@@ -183,85 +169,28 @@ runService.Stepped:Connect(function()
 end)
 
 ------------------------------------------------------------
--- LOGIKA ESP MM2
+-- ESP MM2
 ------------------------------------------------------------
 local function getRole(player)
     if not player.Character then return "Innocent" end
-    
-    local function checkContainer(container)
-        if not container then return nil end
-        for _, item in pairs(container:GetChildren()) do
+    local function checkContainer(c)
+        if not c then return nil end
+        for _, item in pairs(c:GetChildren()) do
             if item:IsA("Tool") then
                 local n = item.Name:lower()
-                if n:find("knife") or n:find("blade") or n:find("nóż") then
-                    return "Murderer"
-                elseif n:find("gun") or n:find("revolver") or n:find("pistol") then
-                    return "Sheriff"
-                end
+                if n:find("knife") or n:find("blade") or n:find("nóż") then return "Murderer"
+                elseif n:find("gun") or n:find("revolver") or n:find("pistol") then return "Sheriff" end
             end
         end
         return nil
     end
-
-    local role = checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character)
-    return role or "Innocent"
+    return checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character) or "Innocent"
 end
 
 local function getRoleColor(role)
     if role == "Murderer" then return Color3.fromRGB(255, 0, 0)
     elseif role == "Sheriff" then return Color3.fromRGB(0, 150, 255)
     else return Color3.fromRGB(0, 255, 0) end
-end
-
-local function updateESP()
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= plr and player.Character then
-            local char = player.Character
-            local head = char:FindFirstChild("Head")
-            
-            if espEnabled and head then
-                local role = getRole(player)
-                local color = getRoleColor(role)
-                
-                -- Highlight
-                local highlight = char:FindFirstChild("ESPHighlight")
-                if not highlight then
-                    highlight = Instance.new("Highlight")
-                    highlight.Name = "ESPHighlight"
-                    highlight.Parent = char
-                end
-                highlight.Adornee = char
-                highlight.FillColor = color
-                highlight.FillTransparency = 0.5
-                highlight.OutlineColor = color
-                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-
-                -- Label
-                local bb = head:FindFirstChild("ESPLabel")
-                if not bb then
-                    bb = Instance.new("BillboardGui")
-                    bb.Name = "ESPLabel"
-                    bb.Size = UDim2.new(0, 100, 0, 30)
-                    bb.StudsOffset = Vector3.new(0, 2.5, 0)
-                    bb.AlwaysOnTop = true
-                    bb.Parent = head
-                    
-                    local label = Instance.new("TextLabel")
-                    label.Name = "Txt"
-                    label.Size = UDim2.new(1, 0, 1, 0)
-                    label.BackgroundTransparency = 1
-                    label.TextSize = 14
-                    label.Font = Enum.Font.SourceSansBold
-                    label.Parent = bb
-                end
-                bb.Txt.Text = player.Name .. " [" .. role .. "]"
-                bb.Txt.TextColor3 = color
-            else
-                if char:FindFirstChild("ESPHighlight") then char.ESPHighlight:Destroy() end
-                if head and head:FindFirstChild("ESPLabel") then head.ESPLabel:Destroy() end
-            end
-        end
-    end
 end
 
 b3.MouseButton1Click:Connect(function()
@@ -275,4 +204,43 @@ b3.MouseButton1Click:Connect(function()
     end
 end)
 
-runService.RenderStepped:Connect(updateESP)
+runService.RenderStepped:Connect(function()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= plr and player.Character then
+            local char = player.Character
+            local head = char:FindFirstChild("Head")
+            
+            if espEnabled and head then
+                local role = getRole(player)
+                local color = getRoleColor(role)
+                
+                local highlight = char:FindFirstChild("ESPHighlight") or Instance.new("Highlight", char)
+                highlight.Name = "ESPHighlight"
+                highlight.Adornee = char
+                highlight.FillColor = color
+                highlight.FillTransparency = 0.5
+                highlight.OutlineColor = color
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+                local bb = head:FindFirstChild("ESPLabel") or Instance.new("BillboardGui", head)
+                if bb.Name ~= "ESPLabel" then
+                    bb.Name = "ESPLabel"
+                    bb.Size = UDim2.new(0, 100, 0, 30)
+                    bb.StudsOffset = Vector3.new(0, 2.5, 0)
+                    bb.AlwaysOnTop = true
+                    local label = Instance.new("TextLabel", bb)
+                    label.Name = "Txt"
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.BackgroundTransparency = 1
+                    label.TextSize = 14
+                    label.Font = Enum.Font.SourceSansBold
+                end
+                bb.Txt.Text = player.Name .. " [" .. role .. "]"
+                bb.Txt.TextColor3 = color
+            else
+                if char:FindFirstChild("ESPHighlight") then char.ESPHighlight:Destroy() end
+                if head and head:FindFirstChild("ESPLabel") then head.ESPLabel:Destroy() end
+            end
+        end
+    end
+end)
