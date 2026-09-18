@@ -1,4 +1,4 @@
--- Fly + Noclip - GUI pod P + suwak predkosci
+-- Fly + Noclip - GUI pod P + suwak (POPRAWIONE)
 local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
@@ -33,18 +33,73 @@ ScreenGui.ResetOnSpawn = false
 pcall(function() ScreenGui.Parent = game.CoreGui end)
 if not ScreenGui.Parent then ScreenGui.Parent = player:WaitForChild("PlayerGui") end
 
+-- Pasek tytułu (tylko on przeciąga GUI)
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 25)
+TitleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = ScreenGui
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 8)
+
+local TitleText = Instance.new("TextLabel")
+TitleText.Size = UDim2.new(1, 0, 1, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Text = "Fly + Noclip (przeciagnij)"
+TitleText.TextColor3 = Color3.fromRGB(200, 200, 200)
+TitleText.TextSize = 13
+TitleText.Font = Enum.Font.Gotham
+TitleText.Parent = TitleBar
+
+-- Główna ramka (BEZ Draggable - bo przesuwa ją TitleBar)
 local Frame = Instance.new("Frame")
 Frame.Size = UDim2.new(0, 200, 0, 190)
 Frame.Position = UDim2.new(0, 20, 0, 200)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.BorderSizePixel = 0
-Frame.Active = true
-Frame.Draggable = true
 Frame.Visible = false
 Frame.Parent = ScreenGui
 Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
 
--- Przycisk Fly
+------------------------------------------------------------
+-- 🖱️ PRZESUWANIE GUI (tylko z TitleBar)
+------------------------------------------------------------
+local draggingGui = false
+local dragStart, startPos
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        draggingGui = true
+        dragStart = input.Position
+        startPos = Frame.Position
+    end
+end)
+
+TitleBar.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        draggingGui = false
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if draggingGui and (input.UserInputType == Enum.UserInputType.MouseMovement
+    or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        Frame.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+        TitleBar.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y - 25
+        )
+    end
+end)
+
+------------------------------------------------------------
+-- 🛩️ PRZYCISK FLY
+------------------------------------------------------------
 local FlyBtn = Instance.new("TextButton")
 FlyBtn.Size = UDim2.new(0.85, 0, 0, 35)
 FlyBtn.Position = UDim2.new(0.075, 0, 0, 15)
@@ -56,7 +111,9 @@ FlyBtn.Text = "Fly: OFF"
 FlyBtn.Parent = Frame
 Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 6)
 
--- Przycisk Noclip
+------------------------------------------------------------
+-- ⚡ PRZYCISK NOCLIP
+------------------------------------------------------------
 local NoclipBtn = Instance.new("TextButton")
 NoclipBtn.Size = UDim2.new(0.85, 0, 0, 35)
 NoclipBtn.Position = UDim2.new(0.075, 0, 0, 60)
@@ -68,7 +125,9 @@ NoclipBtn.Text = "Noclip: OFF"
 NoclipBtn.Parent = Frame
 Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 6)
 
--- Etykieta prędkości
+------------------------------------------------------------
+-- 🎚️ SUWAK PRĘDKOŚCI
+------------------------------------------------------------
 local SpeedLabel = Instance.new("TextLabel")
 SpeedLabel.Size = UDim2.new(0.85, 0, 0, 20)
 SpeedLabel.Position = UDim2.new(0.075, 0, 0, 110)
@@ -79,7 +138,6 @@ SpeedLabel.TextSize = 14
 SpeedLabel.Font = Enum.Font.Gotham
 SpeedLabel.Parent = Frame
 
--- 🎚️ SUWAK (tło)
 local SliderBack = Instance.new("Frame")
 SliderBack.Size = UDim2.new(0.85, 0, 0, 12)
 SliderBack.Position = UDim2.new(0.075, 0, 0, 140)
@@ -87,9 +145,8 @@ SliderBack.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 SliderBack.Parent = Frame
 Instance.new("UICorner", SliderBack).CornerRadius = UDim.new(0, 6)
 
--- 🎚️ SUWAK (wypełnienie)
 local SliderFill = Instance.new("Frame")
-SliderFill.Size = UDim2.new(0.18, 0, 1, 0)  -- 60/300 ≈ 0.2
+SliderFill.Size = UDim2.new(0.18, 0, 1, 0)
 SliderFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 SliderFill.Parent = SliderBack
 Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(0, 6)
@@ -101,13 +158,14 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.P then
         Frame.Visible = not Frame.Visible
+        TitleBar.Visible = Frame.Visible
     end
 end)
 
 ------------------------------------------------------------
 -- 🎚️ LOGIKA SUWAKA
 ------------------------------------------------------------
-local dragging = false
+local draggingSlider = false
 local minSpeed = 10
 local maxSpeed = 300
 
@@ -124,7 +182,7 @@ end
 SliderBack.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
     or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
+        draggingSlider = true
         updateSlider(input)
     end
 end)
@@ -132,12 +190,12 @@ end)
 SliderBack.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
     or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
+        draggingSlider = false
     end
 end)
 
 game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+    if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement
     or input.UserInputType == Enum.UserInputType.Touch) then
         updateSlider(input)
     end
@@ -232,9 +290,9 @@ end)
 game:GetService("RunService").RenderStepped:Connect(function()
     if not flying then return end
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+    if not player.Character:FindFirstChild("Humanoid") then return end
     
     local hrp = player.Character.HumanoidRootPart
-    if not player.Character:FindFirstChild("Humanoid") then return end
     
     pcall(function()
         hrp.CFrame = CFrame.new(hrp.Position) * (camera.CFrame - camera.CFrame.Position)
@@ -248,13 +306,4 @@ game:GetService("RunService").RenderStepped:Connect(function()
     if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - camera.CFrame.RightVector end
     if uis:IsKeyDown(Enum.KeyCode.D) then dir = dir + camera.CFrame.RightVector end
     if uis:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
-    if uis:IsKeyDown(Enum.KeyCode.LeftControl) then dir = dir - Vector3.new(0, 1, 0) end
-    
-    if dir.Magnitude > 0 then dir = dir.Unit end
-    
-    if fly then
-        fly.Velocity = dir * speed
-    end
-end)
-
-print("✅ Fly + Noclip zaladowany! Nacisnij P aby pokazac GUI.")
+    if uis:IsKeyDown(Enum.KeyCode.LeftControl) then dir = dir - Vector3.new(0, 1
