@@ -11,7 +11,7 @@ local speedHack = false
 local flySpeed = 60
 local walkSpeedVal = 32
 
--- Wyczysc stare
+-- Czyszczenie starych elementów GUI i ESP
 pcall(function()
     if game.CoreGui:FindFirstChild("FlyGuiMM2") then
         game.CoreGui.FlyGuiMM2:Destroy()
@@ -24,14 +24,14 @@ for _, player in pairs(game.Players:GetPlayers()) do
     end
 end
 
--- GUI
+-- Glówne GUI
 local g = Instance.new("ScreenGui")
 g.Name = "FlyGuiMM2"
 g.Parent = game.CoreGui
 
 local f = Instance.new("Frame")
-f.Size = UDim2.new(0, 200, 0, 290)
-f.Position = UDim2.new(0.5, -100, 0.5, -145)
+f.Size = UDim2.new(0, 200, 0, 270)
+f.Position = UDim2.new(0.5, -100, 0.5, -135)
 f.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 f.BorderSizePixel = 0
 f.Active = true
@@ -39,50 +39,29 @@ f.Draggable = true
 f.Visible = true
 f.Parent = g
 
--- Fly Przycisk
-local b1 = Instance.new("TextButton")
-b1.Size = UDim2.new(0.85, 0, 0, 28)
-b1.Position = UDim2.new(0.075, 0, 0, 10)
-b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-b1.TextColor3 = Color3.fromRGB(255, 255, 255)
-b1.TextSize = 15
-b1.Text = "Fly: OFF"
-b1.Parent = f
+-- Funkcja pomocnicza do tworzenia przycisków
+local function createButton(text, posY)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.85, 0, 0, 26)
+    btn.Position = UDim2.new(0.075, 0, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 14
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text
+    btn.Parent = f
+    return btn
+end
 
--- Noclip Przycisk
-local b2 = Instance.new("TextButton")
-b2.Size = UDim2.new(0.85, 0, 0, 28)
-b2.Position = UDim2.new(0.075, 0, 0, 43)
-b2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-b2.TextColor3 = Color3.fromRGB(255, 255, 255)
-b2.TextSize = 15
-b2.Text = "Noclip: OFF"
-b2.Parent = f
+local b1 = createButton("Fly: OFF", 10)
+local b2 = createButton("Noclip: OFF", 42)
+local b3 = createButton("Speed Hack: OFF", 74)
+local b4 = createButton("ESP: OFF", 106)
 
--- Speed Hack Przycisk
-local b3 = Instance.new("TextButton")
-b3.Size = UDim2.new(0.85, 0, 0, 28)
-b3.Position = UDim2.new(0.075, 0, 0, 76)
-b3.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-b3.TextColor3 = Color3.fromRGB(255, 255, 255)
-b3.TextSize = 15
-b3.Text = "Speed Hack: OFF"
-b3.Parent = f
-
--- ESP Przycisk
-local b4 = Instance.new("TextButton")
-b4.Size = UDim2.new(0.85, 0, 0, 28)
-b4.Position = UDim2.new(0.075, 0, 0, 109)
-b4.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-b4.TextColor3 = Color3.fromRGB(255, 255, 255)
-b4.TextSize = 15
-b4.Text = "ESP: OFF"
-b4.Parent = f
-
--- Suwak Fly Speed
+-- Suwak 1: Fly Speed
 local sl1 = Instance.new("TextLabel")
-sl1.Size = UDim2.new(0.85, 0, 0, 16)
-sl1.Position = UDim2.new(0.075, 0, 0, 145)
+sl1.Size = UDim2.new(0.85, 0, 0, 15)
+sl1.Position = UDim2.new(0.075, 0, 0, 140)
 sl1.BackgroundTransparency = 1
 sl1.TextColor3 = Color3.fromRGB(200, 200, 200)
 sl1.TextSize = 12
@@ -91,7 +70,7 @@ sl1.Parent = f
 
 local sb1 = Instance.new("Frame")
 sb1.Size = UDim2.new(0.85, 0, 0, 8)
-sb1.Position = UDim2.new(0.075, 0, 0, 165)
+sb1.Position = UDim2.new(0.075, 0, 0, 160)
 sb1.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 sb1.BorderSizePixel = 0
 sb1.Parent = f
@@ -102,9 +81,9 @@ sf1.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 sf1.BorderSizePixel = 0
 sf1.Parent = sb1
 
--- Suwak Walk Speed
+-- Suwak 2: Walk Speed
 local sl2 = Instance.new("TextLabel")
-sl2.Size = UDim2.new(0.85, 0, 0, 16)
+sl2.Size = UDim2.new(0.85, 0, 0, 15)
 sl2.Position = UDim2.new(0.075, 0, 0, 180)
 sl2.BackgroundTransparency = 1
 sl2.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -125,7 +104,7 @@ sf2.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 sf2.BorderSizePixel = 0
 sf2.Parent = sb2
 
--- Ukrywanie okna (klawisz P)
+-- Ukrywanie GUI pod przyciskiem 'P'
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
@@ -133,7 +112,7 @@ uis.InputBegan:Connect(function(i, gp)
     end
 end)
 
--- Obsługa suwaków
+-- Obsluga suwaków
 local drag1, drag2 = false, false
 sb1.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag1 = true end end)
 sb1.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag1 = false end end)
@@ -161,16 +140,11 @@ end)
 ------------------------------------------------------------
 b1.MouseButton1Click:Connect(function()
     flying = not flying
-    if flying then
-        b1.Text = "Fly: ON"
-        b1.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
-    else
-        b1.Text = "Fly: OFF"
-        b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character.Humanoid.PlatformStand = false
-            plr.Character.Humanoid.AutoRotate = true
-        end
+    b1.Text = flying and "Fly: ON" or "Fly: OFF"
+    b1.BackgroundColor3 = flying and Color3.fromRGB(0, 170, 80) or Color3.fromRGB(50, 50, 50)
+    if not flying and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+        plr.Character.Humanoid.PlatformStand = false
+        plr.Character.Humanoid.AutoRotate = true
     end
 end)
 
