@@ -1,14 +1,15 @@
 -- Fly + Noclip + ESP MM2 + Speed Hack
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
+local runService = game:GetService("RunService")
+local uis = game:GetService("UserInputService")
 
 local flying = false
 local noclip = false
 local espEnabled = false
 local speedHack = false
-local speed = 60
-local walkSpeed = 16
-local fly = nil
+local flySpeed = 60
+local walkSpeedVal = 32
 
 -- Wyczysc stare
 pcall(function()
@@ -34,43 +35,280 @@ f.Position = UDim2.new(0.5, -100, 0.5, -145)
 f.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 f.BorderSizePixel = 0
 f.Active = true
+f.Draggable = true
 f.Visible = true
 f.Parent = g
 
--- Fly
+-- Fly Przycisk
 local b1 = Instance.new("TextButton")
 b1.Size = UDim2.new(0.85, 0, 0, 28)
 b1.Position = UDim2.new(0.075, 0, 0, 10)
 b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b1.TextColor3 = Color3.fromRGB(255, 255, 255)
-b1.Font = 0
 b1.TextSize = 15
 b1.Text = "Fly: OFF"
 b1.Parent = f
 
--- Noclip
+-- Noclip Przycisk
 local b2 = Instance.new("TextButton")
 b2.Size = UDim2.new(0.85, 0, 0, 28)
 b2.Position = UDim2.new(0.075, 0, 0, 43)
 b2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b2.TextColor3 = Color3.fromRGB(255, 255, 255)
-b2.Font = 0
 b2.TextSize = 15
 b2.Text = "Noclip: OFF"
 b2.Parent = f
 
--- Speed Hack
+-- Speed Hack Przycisk
 local b3 = Instance.new("TextButton")
 b3.Size = UDim2.new(0.85, 0, 0, 28)
 b3.Position = UDim2.new(0.075, 0, 0, 76)
 b3.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b3.TextColor3 = Color3.fromRGB(255, 255, 255)
-b3.Font = 0
 b3.TextSize = 15
 b3.Text = "Speed Hack: OFF"
 b3.Parent = f
 
--- ESP
+-- ESP Przycisk
 local b4 = Instance.new("TextButton")
 b4.Size = UDim2.new(0.85, 0, 0, 28)
-b4.Position = UDim
+b4.Position = UDim2.new(0.075, 0, 0, 109)
+b4.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+b4.TextColor3 = Color3.fromRGB(255, 255, 255)
+b4.TextSize = 15
+b4.Text = "ESP: OFF"
+b4.Parent = f
+
+-- Suwak Fly Speed
+local sl1 = Instance.new("TextLabel")
+sl1.Size = UDim2.new(0.85, 0, 0, 16)
+sl1.Position = UDim2.new(0.075, 0, 0, 145)
+sl1.BackgroundTransparency = 1
+sl1.TextColor3 = Color3.fromRGB(200, 200, 200)
+sl1.TextSize = 12
+sl1.Text = "Fly Speed: 60"
+sl1.Parent = f
+
+local sb1 = Instance.new("Frame")
+sb1.Size = UDim2.new(0.85, 0, 0, 8)
+sb1.Position = UDim2.new(0.075, 0, 0, 165)
+sb1.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+sb1.BorderSizePixel = 0
+sb1.Parent = f
+
+local sf1 = Instance.new("Frame")
+sf1.Size = UDim2.new(0.18, 0, 1, 0)
+sf1.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+sf1.BorderSizePixel = 0
+sf1.Parent = sb1
+
+-- Suwak Walk Speed
+local sl2 = Instance.new("TextLabel")
+sl2.Size = UDim2.new(0.85, 0, 0, 16)
+sl2.Position = UDim2.new(0.075, 0, 0, 180)
+sl2.BackgroundTransparency = 1
+sl2.TextColor3 = Color3.fromRGB(200, 200, 200)
+sl2.TextSize = 12
+sl2.Text = "Walk Speed: 32"
+sl2.Parent = f
+
+local sb2 = Instance.new("Frame")
+sb2.Size = UDim2.new(0.85, 0, 0, 8)
+sb2.Position = UDim2.new(0.075, 0, 0, 200)
+sb2.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+sb2.BorderSizePixel = 0
+sb2.Parent = f
+
+local sf2 = Instance.new("Frame")
+sf2.Size = UDim2.new(0.2, 0, 1, 0)
+sf2.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+sf2.BorderSizePixel = 0
+sf2.Parent = sb2
+
+-- Ukrywanie okna (klawisz P)
+uis.InputBegan:Connect(function(i, gp)
+    if gp then return end
+    if i.KeyCode == Enum.KeyCode.P then
+        f.Visible = not f.Visible
+    end
+end)
+
+-- Obsługa suwaków
+local drag1, drag2 = false, false
+sb1.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag1 = true end end)
+sb1.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag1 = false end end)
+sb2.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag2 = true end end)
+sb2.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag2 = false end end)
+
+uis.InputChanged:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseMovement then
+        if drag1 then
+            local r = math.clamp((i.Position.X - sb1.AbsolutePosition.X) / sb1.AbsoluteSize.X, 0, 1)
+            sf1.Size = UDim2.new(r, 0, 1, 0)
+            flySpeed = math.floor(10 + r * 290)
+            sl1.Text = "Fly Speed: " .. flySpeed
+        elseif drag2 then
+            local r = math.clamp((i.Position.X - sb2.AbsolutePosition.X) / sb2.AbsoluteSize.X, 0, 1)
+            sf2.Size = UDim2.new(r, 0, 1, 0)
+            walkSpeedVal = math.floor(16 + r * 150)
+            sl2.Text = "Walk Speed: " .. walkSpeedVal
+        end
+    end
+end)
+
+------------------------------------------------------------
+-- LOGIKA FLY (Z ROTACJĄ DO KAMERY)
+------------------------------------------------------------
+b1.MouseButton1Click:Connect(function()
+    flying = not flying
+    if flying then
+        b1.Text = "Fly: ON"
+        b1.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
+    else
+        b1.Text = "Fly: OFF"
+        b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            plr.Character.Humanoid.PlatformStand = false
+            plr.Character.Humanoid.AutoRotate = true
+        end
+    end
+end)
+
+runService.RenderStepped:Connect(function(dt)
+    if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = plr.Character.HumanoidRootPart
+        local hum = plr.Character:FindFirstChild("Humanoid")
+        
+        if hum then 
+            hum.PlatformStand = true 
+            hum.AutoRotate = false
+        end
+
+        local moveDir = Vector3.new(0, 0, 0)
+        if uis:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+
+        local nextPos = hrp.Position
+        if moveDir.Magnitude > 0 then
+            nextPos = hrp.Position + (moveDir.Unit * flySpeed * dt)
+        end
+
+        local lookAt = nextPos + cam.CFrame.LookVector
+        hrp.CFrame = CFrame.new(nextPos, lookAt)
+        hrp.Velocity = Vector3.new(0, 0, 0)
+    end
+end)
+
+------------------------------------------------------------
+-- LOGIKA NOCLIP
+------------------------------------------------------------
+b2.MouseButton1Click:Connect(function()
+    noclip = not noclip
+    b2.Text = noclip and "Noclip: ON" or "Noclip: OFF"
+    b2.BackgroundColor3 = noclip and Color3.fromRGB(0, 170, 80) or Color3.fromRGB(50, 50, 50)
+end)
+
+runService.Stepped:Connect(function()
+    if noclip and plr.Character then
+        for _, part in pairs(plr.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+------------------------------------------------------------
+-- LOGIKA SPEED HACK
+------------------------------------------------------------
+b3.MouseButton1Click:Connect(function()
+    speedHack = not speedHack
+    b3.Text = speedHack and "Speed Hack: ON" or "Speed Hack: OFF"
+    b3.BackgroundColor3 = speedHack and Color3.fromRGB(0, 170, 80) or Color3.fromRGB(50, 50, 50)
+end)
+
+runService.RenderStepped:Connect(function()
+    if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+        if speedHack then
+            plr.Character.Humanoid.WalkSpeed = walkSpeedVal
+        else
+            plr.Character.Humanoid.WalkSpeed = 16
+        end
+    end
+end)
+
+------------------------------------------------------------
+-- LOGIKA ESP MM2
+------------------------------------------------------------
+local function getRole(player)
+    if not player.Character then return "Innocent" end
+    local function checkContainer(c)
+        if not c then return nil end
+        for _, item in pairs(c:GetChildren()) do
+            if item:IsA("Tool") then
+                local n = item.Name:lower()
+                if n:find("knife") or n:find("blade") or n:find("nóż") then return "Murderer"
+                elseif n:find("gun") or n:find("revolver") or n:find("pistol") then return "Sheriff" end
+            end
+        end
+        return nil
+    end
+    return checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character) or "Innocent"
+end
+
+local function getRoleColor(role)
+    if role == "Murderer" then return Color3.fromRGB(255, 0, 0)
+    elseif role == "Sheriff" then return Color3.fromRGB(0, 150, 255)
+    else return Color3.fromRGB(0, 255, 0) end
+end
+
+b4.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    b4.Text = espEnabled and "ESP: ON" or "ESP: OFF"
+    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 170, 80) or Color3.fromRGB(50, 50, 50)
+end)
+
+runService.RenderStepped:Connect(function()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= plr and player.Character then
+            local char = player.Character
+            local head = char:FindFirstChild("Head")
+            
+            if espEnabled and head then
+                local role = getRole(player)
+                local color = getRoleColor(role)
+                
+                local highlight = char:FindFirstChild("ESPHighlight") or Instance.new("Highlight", char)
+                highlight.Name = "ESPHighlight"
+                highlight.Adornee = char
+                highlight.FillColor = color
+                highlight.FillTransparency = 0.5
+                highlight.OutlineColor = color
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+                local bb = head:FindFirstChild("ESPLabel") or Instance.new("BillboardGui", head)
+                if bb.Name ~= "ESPLabel" then
+                    bb.Name = "ESPLabel"
+                    bb.Size = UDim2.new(0, 100, 0, 30)
+                    bb.StudsOffset = Vector3.new(0, 2.5, 0)
+                    bb.AlwaysOnTop = true
+                    local label = Instance.new("TextLabel", bb)
+                    label.Name = "Txt"
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.BackgroundTransparency = 1
+                    label.TextSize = 14
+                    label.Font = Enum.Font.SourceSansBold
+                end
+                bb.Txt.Text = player.Name .. " [" .. role .. "]"
+                bb.Txt.TextColor3 = color
+            else
+                if char:FindFirstChild("ESPHighlight") then char.ESPHighlight:Destroy() end
+                if head and head:FindFirstChild("ESPLabel") then head.ESPLabel:Destroy() end
+            end
+        end
+    end
+end)
