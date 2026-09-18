@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 (Z rotacją w stronę kamery)
+-- Fly + Noclip + ESP MM2 (Z DZIAŁAJĄCĄ ROTACJĄ POSTACI)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -106,7 +106,7 @@ uis.InputChanged:Connect(function(i)
 end)
 
 ------------------------------------------------------------
--- FLY (PŁYNNY + ROTACJA DO KAMERY)
+-- FLY (Z WYMUSZONĄ ROTACJĄ POSTACI)
 ------------------------------------------------------------
 b1.MouseButton1Click:Connect(function()
     flying = not flying
@@ -118,6 +118,7 @@ b1.MouseButton1Click:Connect(function()
         b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         if plr.Character and plr.Character:FindFirstChild("Humanoid") then
             plr.Character.Humanoid.PlatformStand = false
+            plr.Character.Humanoid.AutoRotate = true
         end
     end
 end)
@@ -126,7 +127,11 @@ runService.RenderStepped:Connect(function(dt)
     if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = plr.Character.HumanoidRootPart
         local hum = plr.Character:FindFirstChild("Humanoid")
-        if hum then hum.PlatformStand = true end
+        
+        if hum then 
+            hum.PlatformStand = true 
+            hum.AutoRotate = false -- Wyłączamy automatyczną rotację Robloxa
+        end
 
         local moveDir = Vector3.new(0, 0, 0)
 
@@ -142,14 +147,15 @@ runService.RenderStepped:Connect(function(dt)
             nextPos = hrp.Position + (moveDir.Unit * speed * dt)
         end
 
-        -- Ustawienie pozycji ORAZ rotacji w stronę, w którą patrzy kamera
-        hrp.CFrame = CFrame.new(nextPos, nextPos + cam.CFrame.LookVector)
+        -- Całkowite nadpisanie CFrame (Pozycja + Pełna Rotacja Kamery)
+        local lookAt = nextPos + cam.CFrame.LookVector
+        hrp.CFrame = CFrame.new(nextPos, lookAt)
         hrp.Velocity = Vector3.new(0, 0, 0)
     end
 end)
 
 ------------------------------------------------------------
--- NOCLIP (PRZECHODZENIE PRZEZ ŚCIANY)
+-- NOCLIP
 ------------------------------------------------------------
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
@@ -173,7 +179,7 @@ runService.Stepped:Connect(function()
 end)
 
 ------------------------------------------------------------
--- ESP MM2 (WYKRYWANIE RÓL)
+-- ESP MM2
 ------------------------------------------------------------
 local function getRole(player)
     if not player.Character then return "Innocent" end
