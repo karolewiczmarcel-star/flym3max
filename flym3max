@@ -1,66 +1,80 @@
--- Fly + Noclip v2 - na srodku ekranu
+-- Fly + Noclip + ESP (MM2)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 
 local flying = false
 local noclip = false
+local espEnabled = false
 local speed = 60
 local fly = nil
 
 -- Usun stare
 pcall(function()
-    if game.CoreGui:FindFirstChild("FlyGuiV2") then
-        game.CoreGui.FlyGuiV2:Destroy()
+    if game.CoreGui:FindFirstChild("FlyGuiMM2") then
+        game.CoreGui.FlyGuiMM2:Destroy()
+    end
+    if game.CoreGui:FindFirstChild("ESPGui") then
+        game.CoreGui.ESPGui:Destroy()
     end
 end)
 
 -- GUI
 local g = Instance.new("ScreenGui")
-g.Name = "FlyGuiV2"
+g.Name = "FlyGuiMM2"
 g.Parent = game.CoreGui
 
 local f = Instance.new("Frame")
-f.Size = UDim2.new(0, 180, 0, 170)
-f.Position = UDim2.new(0.5, -90, 0.5, -85) -- ⬅ ŚRODEK EKRANU
+f.Size = UDim2.new(0, 180, 0, 200)
+f.Position = UDim2.new(0.5, -90, 0.5, -100)
 f.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 f.BorderSizePixel = 0
 f.Active = true
-f.Visible = true -- ⬅ od razu widoczne
+f.Visible = true
 f.Parent = g
 
 local b1 = Instance.new("TextButton")
-b1.Size = UDim2.new(0.8, 0, 0, 35)
+b1.Size = UDim2.new(0.8, 0, 0, 30)
 b1.Position = UDim2.new(0.1, 0, 0, 10)
 b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b1.TextColor3 = Color3.fromRGB(255, 255, 255)
-b1.Font = 0 -- ⬅ Enum.Font.Legacy
-b1.TextSize = 18
+b1.Font = 0
+b1.TextSize = 16
 b1.Text = "Fly: OFF"
 b1.Parent = f
 
 local b2 = Instance.new("TextButton")
-b2.Size = UDim2.new(0.8, 0, 0, 35)
-b2.Position = UDim2.new(0.1, 0, 0, 50)
+b2.Size = UDim2.new(0.8, 0, 0, 30)
+b2.Position = UDim2.new(0.1, 0, 0, 45)
 b2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b2.TextColor3 = Color3.fromRGB(255, 255, 255)
 b2.Font = 0
-b2.TextSize = 18
+b2.TextSize = 16
 b2.Text = "Noclip: OFF"
 b2.Parent = f
 
+local b3 = Instance.new("TextButton")
+b3.Size = UDim2.new(0.8, 0, 0, 30)
+b3.Position = UDim2.new(0.1, 0, 0, 80)
+b3.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+b3.TextColor3 = Color3.fromRGB(255, 255, 255)
+b3.Font = 0
+b3.TextSize = 16
+b3.Text = "ESP: OFF"
+b3.Parent = f
+
 local sl = Instance.new("TextLabel")
-sl.Size = UDim2.new(0.8, 0, 0, 20)
-sl.Position = UDim2.new(0.1, 0, 0, 95)
+sl.Size = UDim2.new(0.8, 0, 0, 18)
+sl.Position = UDim2.new(0.1, 0, 0, 120)
 sl.BackgroundTransparency = 1
 sl.TextColor3 = Color3.fromRGB(200, 200, 200)
 sl.Font = 0
-sl.TextSize = 14
+sl.TextSize = 13
 sl.Text = "Speed: 60"
 sl.Parent = f
 
 local sb = Instance.new("Frame")
-sb.Size = UDim2.new(0.8, 0, 0, 12)
-sb.Position = UDim2.new(0.1, 0, 0, 125)
+sb.Size = UDim2.new(0.8, 0, 0, 10)
+sb.Position = UDim2.new(0.1, 0, 0, 145)
 sb.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 sb.BorderSizePixel = 0
 sb.Parent = f
@@ -97,7 +111,142 @@ uis.InputChanged:Connect(function(i)
     end
 end)
 
--- Fly
+------------------------------------------------------------
+-- 🔍 ESP DLA MM2
+------------------------------------------------------------
+-- W MM2 bron: Knife = Murderer, Gun = Sheriff
+-- Szukamy w Backpack / Character
+
+local espFolder = Instance.new("Folder")
+espFolder.Name = "ESPHighlights"
+espFolder.Parent = game.CoreGui
+
+local function getRole(player)
+    if not player.Character then return "Innocent" end
+    local backpack = player:FindFirstChild("Backpack")
+    local char = player.Character
+    
+    -- Sprawdzamy czy ma nóż (morderca) - Knife w MM2 ma kolor czerwony lub jest w "Knife" w nazwie
+    for _, item in pairs(backpack:GetChildren()) do
+        if item:IsA("Tool") and (item.Name:lower():find("knife") or item.Name:lower():find("nóż")) then
+            return "Murderer"
+        end
+    end
+    for _, item in pairs(char:GetChildren()) do
+        if item:IsA("Tool") and (item.Name:lower():find("knife") or item.Name:lower():find("nóż")) then
+            return "Murderer"
+        end
+    end
+    
+    -- Sprawdzamy czy ma pistolet (szeryf)
+    for _, item in pairs(backpack:GetChildren()) do
+        if item:IsA("Tool") and (item.Name:lower():find("gun") or item.Name:lower():find("revolver") or item.Name:lower():find("pistol")) then
+            return "Sheriff"
+        end
+    end
+    for _, item in pairs(char:GetChildren()) do
+        if item:IsA("Tool") and (item.Name:lower():find("gun") or item.Name:lower():find("revolver") or item.Name:lower():find("pistol")) then
+            return "Sheriff"
+        end
+    end
+    
+    return "Innocent"
+end
+
+local function getRoleColor(role)
+    if role == "Murderer" then
+        return Color3.fromRGB(255, 0, 0) -- Czerwony
+    elseif role == "Sheriff" then
+        return Color3.fromRGB(0, 150, 255) -- Niebieski
+    else
+        return Color3.fromRGB(200, 200, 200) -- Biały
+    end
+end
+
+local function createESP(player)
+    if player == plr then return end
+    if not player.Character then return end
+    
+    -- Usuń stary highlight
+    local old = espFolder:FindFirstChild(player.Name)
+    if old then old:Destroy() end
+    
+    local role = getRole(player)
+    local color = getRoleColor(role)
+    
+    local highlight = Instance.new("Highlight")
+    highlight.Name = player.Name
+    highlight.Adornee = player.Character
+    highlight.FillColor = color
+    highlight.FillTransparency = 0.5
+    highlight.OutlineColor = color
+    highlight.OutlineTransparency = 0
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Parent = espFolder
+    
+    -- Dodajemy napis z rolą
+    local head = player.Character:FindFirstChild("Head")
+    if head then
+        local oldBB = head:FindFirstChild("ESPLabel")
+        if oldBB then oldBB:Destroy() end
+        
+        local bb = Instance.new("BillboardGui")
+        bb.Name = "ESPLabel"
+        bb.Adornee = head
+        bb.Size = UDim2.new(0, 100, 0, 30)
+        bb.StudsOffset = Vector3.new(0, 2.5, 0)
+        bb.AlwaysOnTop = true
+        bb.Parent = head
+        
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.TextColor3 = color
+        label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        label.TextStrokeTransparency = 0
+        label.Font = 0
+        label.TextSize = 14
+        label.Text = player.Name .. " [" .. role .. "]"
+        label.Parent = bb
+    end
+end
+
+local function updateESP()
+    if not espEnabled then return end
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= plr and player.Character then
+            createESP(player)
+        end
+    end
+end
+
+-- Toggle ESP
+b3.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    if espEnabled then
+        b3.Text = "ESP: ON"
+        b3.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
+        updateESP()
+    else
+        b3.Text = "ESP: OFF"
+        b3.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        for _, v in pairs(espFolder:GetChildren()) do
+            v:Destroy()
+        end
+    end
+end)
+
+-- Aktualizuj ESP co 2 sekundy
+while true do
+    if espEnabled then
+        updateESP()
+    end
+    wait(2)
+end
+
+------------------------------------------------------------
+-- 🛩️ FLY
+------------------------------------------------------------
 b1.MouseButton1Click:Connect(function()
     if flying then
         flying = false
@@ -123,7 +272,9 @@ b1.MouseButton1Click:Connect(function()
     end
 end)
 
--- Noclip
+------------------------------------------------------------
+-- ⚡ NOCLIP
+------------------------------------------------------------
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
     if noclip then
@@ -135,7 +286,9 @@ b2.MouseButton1Click:Connect(function()
     end
 end)
 
--- Respawn
+------------------------------------------------------------
+-- 🔄 RESPAWN
+------------------------------------------------------------
 plr.CharacterAdded:Connect(function()
     if flying then
         flying = false
@@ -148,9 +301,16 @@ plr.CharacterAdded:Connect(function()
         b2.Text = "Noclip: OFF"
         b2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     end
+    -- Odśwież ESP po respawnie
+    if espEnabled then
+        wait(1)
+        updateESP()
+    end
 end)
 
--- Petle
+------------------------------------------------------------
+-- 🎮 PĘTLE
+------------------------------------------------------------
 game:GetService("RunService").Stepped:Connect(function()
     if noclip and plr.Character then
         for _, v in pairs(plr.Character:GetDescendants()) do
@@ -177,4 +337,4 @@ game:GetService("RunService").RenderStepped:Connect(function()
     fly.Velocity = d * speed
 end)
 
-print("OK - GUI na srodku ekranu")
+print("OK - MM2 skrypt zaladowany!")
