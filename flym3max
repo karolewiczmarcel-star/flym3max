@@ -1,6 +1,8 @@
--- Fly + Noclip + ESP MM2 - DEFINITYWNIE DZIALA
+-- Fly + Noclip + ESP MM2 - POPRAWIONY I DZIAŁAJĄCY
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
+local runService = game:GetService("RunService")
+local uis = game:GetService("UserInputService")
 
 local flying = false
 local noclip = false
@@ -8,7 +10,7 @@ local espEnabled = false
 local speed = 60
 local fly = nil
 
--- Wyczysc stare
+-- Wyczysc stare GUI i ESP
 pcall(function()
     if game.CoreGui:FindFirstChild("FlyGuiMM2") then
         game.CoreGui.FlyGuiMM2:Destroy()
@@ -32,6 +34,7 @@ f.Position = UDim2.new(0.5, -90, 0.5, -100)
 f.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 f.BorderSizePixel = 0
 f.Active = true
+f.Draggable = true -- Dodana możliwość przeciągania okna
 f.Visible = true
 f.Parent = g
 
@@ -40,7 +43,6 @@ b1.Size = UDim2.new(0.8, 0, 0, 30)
 b1.Position = UDim2.new(0.1, 0, 0, 10)
 b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b1.TextColor3 = Color3.fromRGB(255, 255, 255)
-b1.Font = 0
 b1.TextSize = 16
 b1.Text = "Fly: OFF"
 b1.Parent = f
@@ -50,7 +52,6 @@ b2.Size = UDim2.new(0.8, 0, 0, 30)
 b2.Position = UDim2.new(0.1, 0, 0, 45)
 b2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b2.TextColor3 = Color3.fromRGB(255, 255, 255)
-b2.Font = 0
 b2.TextSize = 16
 b2.Text = "Noclip: OFF"
 b2.Parent = f
@@ -60,7 +61,6 @@ b3.Size = UDim2.new(0.8, 0, 0, 30)
 b3.Position = UDim2.new(0.1, 0, 0, 80)
 b3.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 b3.TextColor3 = Color3.fromRGB(255, 255, 255)
-b3.Font = 0
 b3.TextSize = 16
 b3.Text = "ESP: OFF"
 b3.Parent = f
@@ -70,7 +70,6 @@ sl.Size = UDim2.new(0.8, 0, 0, 18)
 sl.Position = UDim2.new(0.1, 0, 0, 120)
 sl.BackgroundTransparency = 1
 sl.TextColor3 = Color3.fromRGB(200, 200, 200)
-sl.Font = 0
 sl.TextSize = 13
 sl.Text = "Speed: 60"
 sl.Parent = f
@@ -88,9 +87,7 @@ sf.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 sf.BorderSizePixel = 0
 sf.Parent = sb
 
-local uis = game:GetService("UserInputService")
-
--- P
+-- Ukrywanie okna pod klawiszem P
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
@@ -98,7 +95,7 @@ uis.InputBegan:Connect(function(i, gp)
     end
 end)
 
--- Suwak
+-- Suwak prędkości
 local drag = false
 sb.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = true end
@@ -116,35 +113,53 @@ uis.InputChanged:Connect(function(i)
 end)
 
 ------------------------------------------------------------
--- 🛩️ FLY (logika na samym koncu zeby sie nie blokowalo)
+-- LOGIKA FLY (Latanie)
 ------------------------------------------------------------
 b1.MouseButton1Click:Connect(function()
+    flying = not flying
     if flying then
-        flying = false
-        b1.Text = "Fly: OFF"
-        b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        if fly then fly:Destroy() end
-        fly = nil
-        pcall(function()
-            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                plr.Character.Humanoid.PlatformStand = false
-            end
-        end)
-    else
-        if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
-        flying = true
         b1.Text = "Fly: ON"
         b1.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
-        plr.Character.Humanoid.PlatformStand = true
-        fly = Instance.new("BodyVelocity")
-        fly.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        fly.Velocity = Vector3.new(0, 0, 0)
-        fly.Parent = plr.Character.HumanoidRootPart
+        
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            plr.Character.Humanoid.PlatformStand = true
+            
+            fly = Instance.new("BodyVelocity")
+            fly.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            fly.Velocity = Vector3.new(0, 0, 0)
+            fly.Parent = plr.Character.HumanoidRootPart
+        end
+    else
+        b1.Text = "Fly: OFF"
+        b1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        
+        if fly then fly:Destroy() end
+        fly = nil
+        
+        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            plr.Character.Humanoid.PlatformStand = false
+        end
+    end
+end)
+
+-- Sterowanie lataniem w każdej klatce
+runService.RenderStepped:Connect(function()
+    if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and fly then
+        local moveDir = Vector3.new(0, 0, 0)
+        
+        if uis:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+        
+        fly.Velocity = moveDir * speed
     end
 end)
 
 ------------------------------------------------------------
--- ⚡ NOCLIP
+-- LOGIKA NOCLIP (Przechodzenie przez ściany)
 ------------------------------------------------------------
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
@@ -157,96 +172,107 @@ b2.MouseButton1Click:Connect(function()
     end
 end)
 
+runService.Stepped:Connect(function()
+    if noclip and plr.Character then
+        for _, part in pairs(plr.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
 ------------------------------------------------------------
--- 🔍 ESP MM2
+-- LOGIKA ESP MM2
 ------------------------------------------------------------
 local function getRole(player)
     if not player.Character then return "Innocent" end
-    if not player:FindFirstChild("Backpack") then return "Innocent" end
     
-    for _, item in pairs(player.Backpack:GetChildren()) do
-        if item:IsA("Tool") then
-            local n = item.Name:lower()
-            if n:find("knife") or n:find("blade") or n:find("nóż") then
-                return "Murderer"
-            elseif n:find("gun") or n:find("revolver") or n:find("pistol") or n:find("rifle") then
-                return "Sheriff"
+    local function checkContainer(container)
+        if not container then return nil end
+        for _, item in pairs(container:GetChildren()) do
+            if item:IsA("Tool") then
+                local n = item.Name:lower()
+                if n:find("knife") or n:find("blade") or n:find("nóż") then
+                    return "Murderer"
+                elseif n:find("gun") or n:find("revolver") or n:find("pistol") then
+                    return "Sheriff"
+                end
             end
         end
+        return nil
     end
-    for _, item in pairs(player.Character:GetChildren()) do
-        if item:IsA("Tool") then
-            local n = item.Name:lower()
-            if n:find("knife") or n:find("blade") or n:find("nóż") then
-                return "Murderer"
-            elseif n:find("gun") or n:find("revolver") or n:find("pistol") or n:find("rifle") then
-                return "Sheriff"
-            end
-        end
-    end
-    return "Innocent"
+
+    local role = checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character)
+    return role or "Innocent"
 end
 
 local function getRoleColor(role)
     if role == "Murderer" then return Color3.fromRGB(255, 0, 0)
     elseif role == "Sheriff" then return Color3.fromRGB(0, 150, 255)
-    else return Color3.fromRGB(200, 200, 200) end
+    else return Color3.fromRGB(0, 255, 0) end
 end
 
-local function clearESP()
+local function updateESP()
     for _, player in pairs(game.Players:GetPlayers()) do
         if player ~= plr and player.Character then
-            local head = player.Character:FindFirstChild("Head")
-            if head then
-                local bb = head:FindFirstChild("ESPLabel")
-                if bb then bb:Destroy() end
-            end
-            for _, part in pairs(player.Character:GetChildren()) do
-                if part:IsA("Highlight") and part.Name == "ESPHighlight" then
-                    part:Destroy()
+            local char = player.Character
+            local head = char:FindFirstChild("Head")
+            
+            if espEnabled and head then
+                local role = getRole(player)
+                local color = getRoleColor(role)
+                
+                -- Highlight
+                local highlight = char:FindFirstChild("ESPHighlight")
+                if not highlight then
+                    highlight = Instance.new("Highlight")
+                    highlight.Name = "ESPHighlight"
+                    highlight.Parent = char
                 end
+                highlight.Adornee = char
+                highlight.FillColor = color
+                highlight.FillTransparency = 0.5
+                highlight.OutlineColor = color
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+                -- Label
+                local bb = head:FindFirstChild("ESPLabel")
+                if not bb then
+                    bb = Instance.new("BillboardGui")
+                    bb.Name = "ESPLabel"
+                    bb.Size = UDim2.new(0, 100, 0, 30)
+                    bb.StudsOffset = Vector3.new(0, 2.5, 0)
+                    bb.AlwaysOnTop = true
+                    bb.Parent = head
+                    
+                    local label = Instance.new("TextLabel")
+                    label.Name = "Txt"
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.BackgroundTransparency = 1
+                    label.TextSize = 14
+                    label.Font = Enum.Font.SourceSansBold
+                    label.Parent = bb
+                end
+                bb.Txt.Text = player.Name .. " [" .. role .. "]"
+                bb.Txt.TextColor3 = color
+            else
+                if char:FindFirstChild("ESPHighlight") then char.ESPHighlight:Destroy() end
+                if head and head:FindFirstChild("ESPLabel") then head.ESPLabel:Destroy() end
             end
         end
     end
 end
 
-local function createESP()
-    if not espEnabled then return end
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= plr and player.Character then
-            local head = player.Character:FindFirstChild("Head")
-            if not head then continue end
-            
-            local role = getRole(player)
-            local color = getRoleColor(role)
-            
-            local oldBB = head:FindFirstChild("ESPLabel")
-            if oldBB then oldBB:Destroy() end
-            for _, part in pairs(player.Character:GetChildren()) do
-                if part:IsA("Highlight") and part.Name == "ESPHighlight" then
-                    part:Destroy()
-                end
-            end
-            
-            local highlight = Instance.new("Highlight")
-            highlight.Name = "ESPHighlight"
-            highlight.Adornee = player.Character
-            highlight.FillColor = color
-            highlight.FillTransparency = 0.5
-            highlight.OutlineColor = color
-            highlight.OutlineTransparency = 0
-            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            highlight.Parent = player.Character
-            
-            local bb = Instance.new("BillboardGui")
-            bb.Name = "ESPLabel"
-            bb.Adornee = head
-            bb.Size = UDim2.new(0, 100, 0, 30)
-            bb.StudsOffset = Vector3.new(0, 2.5, 0)
-            bb.AlwaysOnTop = true
-            bb.Parent = head
-            
-            local label = Instance.new("TextLabel")
-            label.Size = UDim2.new(1, 0, 1, 0)
-            label.BackgroundTransparency = 1
-            label.Text
+b3.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    if espEnabled then
+        b3.Text = "ESP: ON"
+        b3.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
+    else
+        b3.Text = "ESP: OFF"
+        b3.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+runService.RenderStepped:Connect(updateESP)
