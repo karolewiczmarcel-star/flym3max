@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack
+-- Fly + Noclip + ESP MM2 + Speed Hack (Czerwone GUI, na środku, zablokowane)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -26,11 +26,11 @@ g.Parent = game.CoreGui
 
 local f = Instance.new("Frame")
 f.Size = UDim2.new(0, 200, 0, 320)
-f.Position = UDim2.new(0.5, -100, 0.5, -160)
-f.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+f.Position = UDim2.new(0.5, -100, 0.5, -160) -- Idealnie na środku ekranu
+f.BackgroundColor3 = Color3.fromRGB(120, 0, 0) -- Czerwone tło
 f.BorderSizePixel = 0
 f.Active = true
-f.Draggable = true
+f.Draggable = false -- Zablokowane przesuwanie
 f.Visible = true
 f.Parent = g
 
@@ -48,7 +48,7 @@ pad.Parent = f
 local function createButton(text, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.88, 0, 0, 26)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.BackgroundColor3 = Color3.fromRGB(60, 0, 0) -- Ciemnoczerwone przyciski
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 14
     btn.Font = Enum.Font.SourceSansBold
@@ -67,7 +67,7 @@ local b4 = createButton("ESP: OFF", 4)
 local sl1 = Instance.new("TextLabel")
 sl1.Size = UDim2.new(0.88, 0, 0, 14)
 sl1.BackgroundTransparency = 1
-sl1.TextColor3 = Color3.fromRGB(200, 200, 200)
+sl1.TextColor3 = Color3.fromRGB(255, 200, 200)
 sl1.TextSize = 12
 sl1.Font = Enum.Font.SourceSans
 sl1.Text = "Fly Speed: 60"
@@ -76,14 +76,14 @@ sl1.Parent = f
 
 local sb1 = Instance.new("Frame")
 sb1.Size = UDim2.new(0.88, 0, 0, 8)
-sb1.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+sb1.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
 sb1.BorderSizePixel = 0
 sb1.LayoutOrder = 6
 sb1.Parent = f
 
 local sf1 = Instance.new("Frame")
 sf1.Size = UDim2.new(0.18, 0, 1, 0)
-sf1.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+sf1.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 sf1.BorderSizePixel = 0
 sf1.Parent = sb1
 
@@ -91,7 +91,7 @@ sf1.Parent = sb1
 local sl2 = Instance.new("TextLabel")
 sl2.Size = UDim2.new(0.88, 0, 0, 14)
 sl2.BackgroundTransparency = 1
-sl2.TextColor3 = Color3.fromRGB(200, 200, 200)
+sl2.TextColor3 = Color3.fromRGB(255, 200, 200)
 sl2.TextSize = 12
 sl2.Font = Enum.Font.SourceSans
 sl2.Text = "Walk Speed: 32"
@@ -100,14 +100,14 @@ sl2.Parent = f
 
 local sb2 = Instance.new("Frame")
 sb2.Size = UDim2.new(0.88, 0, 0, 8)
-sb2.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+sb2.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
 sb2.BorderSizePixel = 0
 sb2.LayoutOrder = 8
 sb2.Parent = f
 
 local sf2 = Instance.new("Frame")
 sf2.Size = UDim2.new(0.15, 0, 1, 0)
-sf2.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+sf2.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 sf2.BorderSizePixel = 0
 sf2.Parent = sb2
 
@@ -148,7 +148,7 @@ end)
 b1.MouseButton1Click:Connect(function()
     flying = not flying
     b1.Text = flying and "Fly: ON" or "Fly: OFF"
-    b1.BackgroundColor3 = flying and Color3.fromRGB(0, 170, 80) or Color3.fromRGB(50, 50, 50)
+    b1.BackgroundColor3 = flying and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(60, 0, 0)
     if not flying and plr.Character and plr.Character:FindFirstChild("Humanoid") then
         plr.Character.Humanoid.PlatformStand = false
         plr.Character.Humanoid.AutoRotate = true
@@ -190,7 +190,7 @@ end)
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
     b2.Text = noclip and "Noclip: ON" or "Noclip: OFF"
-    b2.BackgroundColor3 = noclip and Color3.fromRGB(0, 170, 80) or Color3.fromRGB(50, 50, 50)
+    b2.BackgroundColor3 = noclip and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(60, 0, 0)
 end)
 
 runService.Stepped:Connect(function()
@@ -207,7 +207,7 @@ end)
 b3.MouseButton1Click:Connect(function()
     speedHack = not speedHack
     b3.Text = speedHack and "Speed Hack: ON" or "Speed Hack: OFF"
-    b3.BackgroundColor3 = speedHack and Color3.fromRGB(0, 170, 80) or Color3.fromRGB(50, 50, 50)
+    b3.BackgroundColor3 = speedHack and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(60, 0, 0)
 end)
 
 runService.RenderStepped:Connect(function()
@@ -244,7 +244,7 @@ end
 b4.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     b4.Text = espEnabled and "ESP: ON" or "ESP: OFF"
-    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 170, 80) or Color3.fromRGB(50, 50, 50)
+    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(60, 0, 0)
 end)
 
 runService.RenderStepped:Connect(function()
