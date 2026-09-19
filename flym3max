@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP + Triggerbot + Alt-Quit
+-- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP + Triggerbot + Alt-Quit + Spinbot
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -11,9 +11,11 @@ local speedHack = false
 local autoGunTP = false
 local triggerbot = false
 local altQuitEnabled = false
+local spinbotEnabled = false
 
 local flySpeed = 60
 local walkSpeedVal = 32
+local spinSpeedVal = 50
 
 -- Czyszczenie starego GUI
 pcall(function()
@@ -30,8 +32,8 @@ g.Parent = game.CoreGui
 
 -- Główny kontener (Dostosowany rozmiar)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 240, 0, 440)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -220)
+mainFrame.Size = UDim2.new(0, 240, 0, 480)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -240)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 2
@@ -59,7 +61,7 @@ scrollFrame.Size = UDim2.new(0.9, 0, 0.88, 0)
 scrollFrame.Position = UDim2.new(0.05, 0, 0.10, 0)
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0
-scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 420)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 500)
 scrollFrame.ScrollBarThickness = 4
 scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
 scrollFrame.Parent = mainFrame
@@ -150,18 +152,45 @@ sf2.Parent = sb2
 -- Dodatkowe Przyciski
 local b6 = createButton("Triggerbot: OFF", 10)
 local b7 = createButton("Alt-Quit: OFF", 11)
+local b8 = createButton("Spinbot: OFF", 12)
+
+-- Suwak Spin Speed
+local sl3 = Instance.new("TextLabel")
+sl3.Size = UDim2.new(0.95, 0, 0, 12)
+sl3.BackgroundTransparency = 1
+sl3.TextColor3 = Color3.fromRGB(255, 180, 100)
+sl3.TextSize = 11
+sl3.Font = Enum.Font.SourceSansBold
+sl3.Text = "Spin Speed: 50"
+sl3.LayoutOrder = 13
+sl3.Parent = scrollFrame
+
+local sb3 = Instance.new("TextButton")
+sb3.Size = UDim2.new(0.95, 0, 0, 10)
+sb3.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
+sb3.BorderSizePixel = 1
+sb3.BorderColor3 = Color3.fromRGB(255, 120, 0)
+sb3.Text = ""
+sb3.AutoButtonColor = false
+sb3.LayoutOrder = 14
+sb3.Parent = scrollFrame
+
+local sf3 = Instance.new("Frame")
+sf3.Size = UDim2.new(0.5, 0, 1, 0)
+sf3.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+sf3.BorderSizePixel = 0
+sf3.Parent = sb3
 
 -- OBSŁUGA SUWAKÓW MYSZKĄ
-local dragging1 = false
-local dragging2 = false
+local dragging1, dragging2, dragging3 = false, false, false
 
 sb1.MouseButton1Down:Connect(function() dragging1 = true end)
 sb2.MouseButton1Down:Connect(function() dragging2 = true end)
+sb3.MouseButton1Down:Connect(function() dragging3 = true end)
 
 uis.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging1 = false
-        dragging2 = false
+        dragging1, dragging2, dragging3 = false, false, false
     end
 end)
 
@@ -179,6 +208,12 @@ uis.InputChanged:Connect(function(i)
             sf2.Size = UDim2.new(rel, 0, 1, 0)
             walkSpeedVal = math.floor(16 + rel * 134)
             sl2.Text = "Walk Speed: " .. walkSpeedVal
+        elseif dragging3 then
+            local posX = i.Position.X
+            local rel = math.clamp((posX - sb3.AbsolutePosition.X) / sb3.AbsoluteSize.X, 0, 1)
+            sf3.Size = UDim2.new(rel, 0, 1, 0)
+            spinSpeedVal = math.floor(10 + rel * 190)
+            sl3.Text = "Spin Speed: " .. spinSpeedVal
         end
     end
 end)
@@ -196,7 +231,30 @@ uis.InputBegan:Connect(function(i, gp)
 end)
 
 ------------------------------------------------------------
--- ALT-QUIT OPACJA
+-- SPINBOT
+------------------------------------------------------------
+b8.MouseButton1Click:Connect(function()
+    spinbotEnabled = not spinbotEnabled
+    b8.Text = spinbotEnabled and "Spinbot: ON" or "Spinbot: OFF"
+    b8.BackgroundColor3 = spinbotEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+    
+    if not spinbotEnabled and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+        plr.Character.Humanoid.AutoRotate = true
+    end
+end)
+
+runService.RenderStepped:Connect(function()
+    if spinbotEnabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = plr.Character.HumanoidRootPart
+        local hum = plr.Character:FindFirstChild("Humanoid")
+        
+        if hum then hum.AutoRotate = false end
+        hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeedVal), 0)
+    end
+end)
+
+------------------------------------------------------------
+-- ALT-QUIT
 ------------------------------------------------------------
 b7.MouseButton1Click:Connect(function()
     altQuitEnabled = not altQuitEnabled
