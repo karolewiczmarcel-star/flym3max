@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack (Pomarańczowe klasyczne GUI)
+-- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP Switch (Pomarańczowe GUI)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -8,6 +8,7 @@ local flying = false
 local noclip = false
 local espEnabled = false
 local speedHack = false
+local autoGunTP = false
 
 local flySpeed = 60
 local walkSpeedVal = 32
@@ -27,8 +28,8 @@ g.Parent = game.CoreGui
 
 -- Główny kontener
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 240, 0, 310)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -155)
+mainFrame.Size = UDim2.new(0, 240, 0, 350)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -175)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 2
@@ -52,8 +53,8 @@ title.Parent = mainFrame
 
 -- Kontener na elementy
 local f = Instance.new("Frame")
-f.Size = UDim2.new(0.9, 0, 0.82, 0)
-f.Position = UDim2.new(0.05, 0, 0.15, 0)
+f.Size = UDim2.new(0.9, 0, 0.85, 0)
+f.Position = UDim2.new(0.05, 0, 0.13, 0)
 f.BackgroundTransparency = 1
 f.Parent = mainFrame
 
@@ -65,7 +66,7 @@ layout.Parent = f
 
 local function createButton(text, order)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 30)
+    btn.Size = UDim2.new(1, 0, 0, 28)
     btn.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
     btn.BackgroundTransparency = 0.2
     btn.BorderSizePixel = 1
@@ -83,24 +84,25 @@ local b1 = createButton("Fly: OFF", 1)
 local b2 = createButton("Noclip: OFF", 2)
 local b3 = createButton("Speed Hack: OFF", 3)
 local b4 = createButton("ESP: OFF", 4)
+local b5 = createButton("Auto TP Gun: OFF", 5)
 
 -- Suwak Fly Speed
 local sl1 = Instance.new("TextLabel")
-sl1.Size = UDim2.new(1, 0, 0, 14)
+sl1.Size = UDim2.new(1, 0, 0, 12)
 sl1.BackgroundTransparency = 1
 sl1.TextColor3 = Color3.fromRGB(255, 180, 100)
 sl1.TextSize = 11
 sl1.Font = Enum.Font.SourceSansBold
 sl1.Text = "Fly Speed: 60"
-sl1.LayoutOrder = 5
+sl1.LayoutOrder = 6
 sl1.Parent = f
 
 local sb1 = Instance.new("Frame")
-sb1.Size = UDim2.new(1, 0, 0, 10)
+sb1.Size = UDim2.new(1, 0, 0, 8)
 sb1.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
 sb1.BorderSizePixel = 1
 sb1.BorderColor3 = Color3.fromRGB(255, 120, 0)
-sb1.LayoutOrder = 6
+sb1.LayoutOrder = 7
 sb1.Parent = f
 
 local sf1 = Instance.new("Frame")
@@ -111,21 +113,21 @@ sf1.Parent = sb1
 
 -- Suwak Speed Hack
 local sl2 = Instance.new("TextLabel")
-sl2.Size = UDim2.new(1, 0, 0, 14)
+sl2.Size = UDim2.new(1, 0, 0, 12)
 sl2.BackgroundTransparency = 1
 sl2.TextColor3 = Color3.fromRGB(255, 180, 100)
 sl2.TextSize = 11
 sl2.Font = Enum.Font.SourceSansBold
 sl2.Text = "Walk Speed: 32"
-sl2.LayoutOrder = 7
+sl2.LayoutOrder = 8
 sl2.Parent = f
 
 local sb2 = Instance.new("Frame")
-sb2.Size = UDim2.new(1, 0, 0, 10)
+sb2.Size = UDim2.new(1, 0, 0, 8)
 sb2.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
 sb2.BorderSizePixel = 1
 sb2.BorderColor3 = Color3.fromRGB(255, 120, 0)
-sb2.LayoutOrder = 8
+sb2.LayoutOrder = 9
 sb2.Parent = f
 
 local sf2 = Instance.new("Frame")
@@ -134,7 +136,7 @@ sf2.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 sf2.BorderSizePixel = 0
 sf2.Parent = sb2
 
--- Ukrywanie okna (Przycisk P)
+-- Ukrywanie okna (P)
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
@@ -173,6 +175,24 @@ uis.InputChanged:Connect(function(i)
             sf2.Size = UDim2.new(r, 0, 1, 0)
             walkSpeedVal = math.floor(16 + r * 134)
             sl2.Text = "Walk Speed: " .. walkSpeedVal
+        end
+    end
+end)
+
+------------------------------------------------------------
+-- AUTO TP TO GUN (SWITCH)
+------------------------------------------------------------
+b5.MouseButton1Click:Connect(function()
+    autoGunTP = not autoGunTP
+    b5.Text = autoGunTP and "Auto TP Gun: ON" or "Auto TP Gun: OFF"
+    b5.BackgroundColor3 = autoGunTP and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+end)
+
+runService.RenderStepped:Connect(function()
+    if autoGunTP and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        local gunDrop = workspace:FindFirstChild("GunDrop", true)
+        if gunDrop then
+            plr.Character.HumanoidRootPart.CFrame = gunDrop.CFrame + Vector3.new(0, 1, 0)
         end
     end
 end)
