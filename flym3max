@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP (Return to Previous Position)
+-- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP + Triggerbot (Sheriff targeting Murderer)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -9,6 +9,7 @@ local noclip = false
 local espEnabled = false
 local speedHack = false
 local autoGunTP = false
+local triggerbot = false
 
 local flySpeed = 60
 local walkSpeedVal = 32
@@ -57,7 +58,7 @@ scrollFrame.Size = UDim2.new(0.9, 0, 0.85, 0)
 scrollFrame.Position = UDim2.new(0.05, 0, 0.12, 0)
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0
-scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 290)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 320)
 scrollFrame.ScrollBarThickness = 4
 scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
 scrollFrame.Parent = mainFrame
@@ -90,6 +91,7 @@ local b2 = createButton("Noclip: OFF", 2)
 local b3 = createButton("Speed Hack: OFF", 3)
 local b4 = createButton("ESP: OFF", 4)
 local b5 = createButton("Auto TP Gun: OFF", 5)
+local b6 = createButton("Triggerbot: OFF", 6)
 
 -- Suwak Fly Speed
 local sl1 = Instance.new("TextLabel")
@@ -99,7 +101,7 @@ sl1.TextColor3 = Color3.fromRGB(255, 180, 100)
 sl1.TextSize = 11
 sl1.Font = Enum.Font.SourceSansBold
 sl1.Text = "Fly Speed: 60"
-sl1.LayoutOrder = 6
+sl1.LayoutOrder = 7
 sl1.Parent = scrollFrame
 
 local sb1 = Instance.new("TextButton")
@@ -109,7 +111,7 @@ sb1.BorderSizePixel = 1
 sb1.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb1.Text = ""
 sb1.AutoButtonColor = false
-sb1.LayoutOrder = 7
+sb1.LayoutOrder = 8
 sb1.Parent = scrollFrame
 
 local sf1 = Instance.new("Frame")
@@ -126,7 +128,7 @@ sl2.TextColor3 = Color3.fromRGB(255, 180, 100)
 sl2.TextSize = 11
 sl2.Font = Enum.Font.SourceSansBold
 sl2.Text = "Walk Speed: 32"
-sl2.LayoutOrder = 8
+sl2.LayoutOrder = 9
 sl2.Parent = scrollFrame
 
 local sb2 = Instance.new("TextButton")
@@ -136,7 +138,7 @@ sb2.BorderSizePixel = 1
 sb2.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb2.Text = ""
 sb2.AutoButtonColor = false
-sb2.LayoutOrder = 9
+sb2.LayoutOrder = 10
 sb2.Parent = scrollFrame
 
 local sf2 = Instance.new("Frame")
@@ -186,6 +188,64 @@ uis.InputBegan:Connect(function(i, gp)
 end)
 
 ------------------------------------------------------------
+-- FUNKCJA ROZPOZNAWANIA RÓL
+------------------------------------------------------------
+local function getRole(player)
+    if not player.Character then return "Innocent" end
+    local function checkContainer(c)
+        if not c then return nil end
+        for _, item in pairs(c:GetChildren()) do
+            if item:IsA("Tool") then
+                local n = item.Name:lower()
+                if n:find("knife") or n:find("blade") or n:find("nóż") then return "Murderer"
+                elseif n:find("gun") or n:find("revolver") or n:find("pistol") then return "Sheriff" end
+            end
+        end
+        return nil
+    end
+    return checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character) or "Innocent"
+end
+
+------------------------------------------------------------
+-- TRIGGERBOT (TYLKO DLA SZERYFA PRZECIWKO MORDERCY)
+------------------------------------------------------------
+b6.MouseButton1Click:Connect(function()
+    triggerbot = not triggerbot
+    b6.Text = triggerbot and "Triggerbot: ON" or "Triggerbot: OFF"
+    b6.BackgroundColor3 = triggerbot and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+end)
+
+runService.RenderStepped:Connect(function()
+    if triggerbot and plr.Character then
+        -- Sprawdzenie czy gracz NIE JEST mordercą
+        if getRole(plr) ~= "Murderer" then
+            local tool = plr.Character:FindFirstChildOfClass("Tool")
+            -- Sprawdzenie czy trzyma pistolet
+            if tool and (tool.Name:lower():find("gun") or tool.Name:lower():find("revolver") or tool.Name:lower():find("pistol")) then
+                local ray = cam:ViewportPointToRay(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+                local raycastParams = RaycastParams.new()
+                raycastParams.FilterDescendantsInstances = {plr.Character}
+                raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
+                local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
+                if result and result.Instance then
+                    local hitChar = result.Instance:FindFirstAncestorOfClass("Model")
+                    if hitChar then
+                        local targetPlayer = game.Players:GetPlayerFromCharacter(hitChar)
+                        if targetPlayer and targetPlayer ~= plr then
+                            -- Strzela tylko jeśli cel to Morderca
+                            if getRole(targetPlayer) == "Murderer" then
+                                tool:Activate()
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+------------------------------------------------------------
 -- AUTO TP TO GUN + PAUZA & POWRÓT
 ------------------------------------------------------------
 local originalPos = nil
@@ -208,15 +268,12 @@ runService.RenderStepped:Connect(function()
         local gunDrop = workspace:FindFirstChild("GunDrop", true)
 
         if gunDrop then
-            -- Jeśli znaleziono broń i jeszcze do niej nie tepnęliśmy: zapamiętaj pozycję
             if not isTeleporting then
                 originalPos = hrp.CFrame
                 isTeleporting = true
             end
-            -- Teleport do broni
             hrp.CFrame = gunDrop.CFrame + Vector3.new(0, 1, 0)
         else
-            -- Gdy broń znika (podniesiona) i byliśmy w trakcie teleportacji
             if isTeleporting then
                 if originalPos then
                     hrp.CFrame = originalPos
@@ -305,22 +362,6 @@ end)
 ------------------------------------------------------------
 -- ESP MM2
 ------------------------------------------------------------
-local function getRole(player)
-    if not player.Character then return "Innocent" end
-    local function checkContainer(c)
-        if not c then return nil end
-        for _, item in pairs(c:GetChildren()) do
-            if item:IsA("Tool") then
-                local n = item.Name:lower()
-                if n:find("knife") or n:find("blade") or n:find("nóż") then return "Murderer"
-                elseif n:find("gun") or n:find("revolver") or n:find("pistol") then return "Sheriff" end
-            end
-        end
-        return nil
-    end
-    return checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character) or "Innocent"
-end
-
 local function getRoleColor(role)
     if role == "Murderer" then return Color3.fromRGB(255, 0, 0)
     elseif role == "Sheriff" then return Color3.fromRGB(0, 150, 255)
