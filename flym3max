@@ -1,4 +1,4 @@
--- MM2 FULL MENU
+-- MM2 FULL MENU (Fixed Player List UI)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -28,15 +28,40 @@ local walkSpeedVal = 32
 local spinSpeedVal = 50
 local farmSpeed = 17
 
-if game.CoreGui:FindFirstChild("Nigga67") then
-    game.CoreGui.Nigga67:Destroy()
+------------------------------------------------------------
+-- UNIVERSAL GUI PARENTING
+------------------------------------------------------------
+local function getTargetGui()
+    if gethui then
+        return gethui()
+    elseif syn and syn.protect_gui then
+        local g = Instance.new("Folder")
+        syn.protect_gui(g)
+        return g
+    end
+    local success, _ = pcall(function() return game:GetService("CoreGui").Name end)
+    if success then
+        return game:GetService("CoreGui")
+    end
+    return plr:WaitForChild("PlayerGui")
 end
+
+local targetParent = getTargetGui()
+
+pcall(function()
+    if targetParent:FindFirstChild("Nigga67") then
+        targetParent.Nigga67:Destroy()
+    end
+    if game.CoreGui:FindFirstChild("Nigga67") then
+        game.CoreGui.Nigga67:Destroy()
+    end
+end)
 
 -- GUI
 local g = Instance.new("ScreenGui")
 g.Name = "Nigga67"
 g.ResetOnSpawn = false
-g.Parent = game.CoreGui
+g.Parent = targetParent
 
 -- Główny kontener
 local mainFrame = Instance.new("Frame")
@@ -66,7 +91,7 @@ for _, pos in ipairs(firePositions) do
     fireLabel.BackgroundTransparency = 1
     fireLabel.Text = "🔥"
     fireLabel.TextSize = 16
-    fireLabel.ZIndex = 20
+    fireLabel.ZIndex = 5
     fireLabel.Parent = mainFrame
 end
 
@@ -80,6 +105,7 @@ title.Text = "Nigga67"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 16
 title.Font = Enum.Font.SourceSansBold
+title.ZIndex = 2
 title.Parent = mainFrame
 
 -- Kontener ze SCROLLOWANIEM
@@ -91,6 +117,7 @@ scrollFrame.BorderSizePixel = 0
 scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 910)
 scrollFrame.ScrollBarThickness = 4
 scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
+scrollFrame.ZIndex = 2
 scrollFrame.Parent = mainFrame
 
 local layout = Instance.new("UIListLayout")
@@ -111,6 +138,7 @@ local function createButton(text, order)
     btn.Font = Enum.Font.SourceSansBold
     btn.Text = text
     btn.LayoutOrder = order
+    btn.ZIndex = 3
     btn.Parent = scrollFrame
     return btn
 end
@@ -131,6 +159,7 @@ sl1.TextSize = 11
 sl1.Font = Enum.Font.SourceSansBold
 sl1.Text = "Fly Speed: 60"
 sl1.LayoutOrder = 6
+sl1.ZIndex = 3
 sl1.Parent = scrollFrame
 
 local sb1 = Instance.new("TextButton")
@@ -141,12 +170,14 @@ sb1.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb1.Text = ""
 sb1.AutoButtonColor = false
 sb1.LayoutOrder = 7
+sb1.ZIndex = 3
 sb1.Parent = scrollFrame
 
 local sf1 = Instance.new("Frame")
 sf1.Size = UDim2.new(0.18, 0, 1, 0)
 sf1.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 sf1.BorderSizePixel = 0
+sf1.ZIndex = 4
 sf1.Parent = sb1
 
 -- Suwak Speed Hack
@@ -158,6 +189,7 @@ sl2.TextSize = 11
 sl2.Font = Enum.Font.SourceSansBold
 sl2.Text = "Walk Speed: 32"
 sl2.LayoutOrder = 8
+sl2.ZIndex = 3
 sl2.Parent = scrollFrame
 
 local sb2 = Instance.new("TextButton")
@@ -168,12 +200,14 @@ sb2.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb2.Text = ""
 sb2.AutoButtonColor = false
 sb2.LayoutOrder = 9
+sb2.ZIndex = 3
 sb2.Parent = scrollFrame
 
 local sf2 = Instance.new("Frame")
 sf2.Size = UDim2.new(0.15, 0, 1, 0)
 sf2.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 sf2.BorderSizePixel = 0
+sf2.ZIndex = 4
 sf2.Parent = sb2
 
 -- Dodatkowe Przyciski
@@ -190,6 +224,7 @@ sl3.TextSize = 11
 sl3.Font = Enum.Font.SourceSansBold
 sl3.Text = "Spin Speed: 50"
 sl3.LayoutOrder = 13
+sl3.ZIndex = 3
 sl3.Parent = scrollFrame
 
 local sb3 = Instance.new("TextButton")
@@ -200,12 +235,14 @@ sb3.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb3.Text = ""
 sb3.AutoButtonColor = false
 sb3.LayoutOrder = 14
+sb3.ZIndex = 3
 sb3.Parent = scrollFrame
 
 local sf3 = Instance.new("Frame")
 sf3.Size = UDim2.new(0.5, 0, 1, 0)
 sf3.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 sf3.BorderSizePixel = 0
+sf3.ZIndex = 4
 sf3.Parent = sb3
 
 local b9 = createButton("Auto Kill All: OFF", 15)
@@ -227,6 +264,7 @@ sl4.TextSize = 11
 sl4.Font = Enum.Font.SourceSansBold
 sl4.Text = "Farm Speed: 17"
 sl4.LayoutOrder = 20
+sl4.ZIndex = 3
 sl4.Parent = scrollFrame
 
 local sb4 = Instance.new("TextButton")
@@ -237,26 +275,30 @@ sb4.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb4.Text = ""
 sb4.AutoButtonColor = false
 sb4.LayoutOrder = 21
+sb4.ZIndex = 3
 sb4.Parent = scrollFrame
 
 local sf4 = Instance.new("Frame")
 sf4.Size = UDim2.new(0.06, 0, 1, 0)
 sf4.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 sf4.BorderSizePixel = 0
+sf4.ZIndex = 4
 sf4.Parent = sb4
 
 -- ANTI-FLING & ANTI-AFK
 local b14 = createButton("Anti-Fling: OFF", 22)
 local b15 = createButton("Anti-AFK: OFF", 23)
 
--- KONTENER NA LISTĘ GRACZY
+------------------------------------------------------------
+-- FIX DLA LISTY GRACZY (POPOPRAWNY Z-INDEX I CANVAS)
+------------------------------------------------------------
 local playerListFrame = Instance.new("ScrollingFrame")
-playerListFrame.Size = UDim2.new(0.9, 0, 0.7, 0)
-playerListFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
-playerListFrame.BackgroundColor3 = Color3.fromRGB(10, 5, 5)
-playerListFrame.BorderColor3 = Color3.fromRGB(255, 50, 0)
+playerListFrame.Size = UDim2.new(0.9, 0, 0.75, 0)
+playerListFrame.Position = UDim2.new(0.05, 0, 0.12, 0)
+playerListFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 10)
+playerListFrame.BorderColor3 = Color3.fromRGB(255, 120, 0)
 playerListFrame.BorderSizePixel = 2
-playerListFrame.ZIndex = 10
+playerListFrame.ZIndex = 100
 playerListFrame.Visible = false
 playerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 playerListFrame.ScrollBarThickness = 6
@@ -264,9 +306,48 @@ playerListFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
 playerListFrame.Parent = mainFrame
 
 local listLayout = Instance.new("UIListLayout")
-listLayout.Padding = UDim.new(0, 2)
+listLayout.Padding = UDim.new(0, 3)
 listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 listLayout.Parent = playerListFrame
+
+local function refreshPlayerList()
+    for _, child in pairs(playerListFrame:GetChildren()) do
+        if child:IsA("TextButton") then 
+            child:Destroy() 
+        end
+    end
+    
+    local count = 0
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= plr then
+            count = count + 1
+            local pBtn = Instance.new("TextButton")
+            pBtn.Size = UDim2.new(0.9, 0, 0, 28)
+            pBtn.BackgroundColor3 = Color3.fromRGB(35, 20, 10)
+            pBtn.BorderColor3 = Color3.fromRGB(255, 100, 0)
+            pBtn.BorderSizePixel = 1
+            pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            pBtn.Font = Enum.Font.SourceSansBold
+            pBtn.TextSize = 13
+            pBtn.Text = p.Name
+            pBtn.ZIndex = 101
+            pBtn.Parent = playerListFrame
+
+            pBtn.MouseButton1Click:Connect(function()
+                targetPlayerName = p.Name
+                b11.Text = "Target: " .. p.Name
+                playerListFrame.Visible = false
+            end)
+        end
+    end
+    playerListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 31)
+end
+
+b11.MouseButton1Click:Connect(function()
+    playerListFrame.Visible = not playerListFrame.Visible
+    if playerListFrame.Visible then refreshPlayerList() end
+end)
 
 -- OBSŁUGA SUWAKÓW
 local dragging1, dragging2, dragging3, dragging4 = false, false, false, false
@@ -321,7 +402,7 @@ uis.InputBegan:Connect(function(i, gp)
 end)
 
 ------------------------------------------------------------
--- ANTI-AFK LOGIC
+-- ANTI-AFK
 ------------------------------------------------------------
 b15.MouseButton1Click:Connect(function()
     antiAfk = not antiAfk
@@ -339,7 +420,7 @@ plr.Idled:Connect(function()
 end)
 
 ------------------------------------------------------------
--- ANTI-FLING LOGIC
+-- ANTI-FLING
 ------------------------------------------------------------
 b14.MouseButton1Click:Connect(function()
     antiFling = not antiFling
@@ -797,39 +878,8 @@ runService.RenderStepped:Connect(function()
 end)
 
 ------------------------------------------------------------
--- LISTA GRACZY I FLING TARGET
+-- FLING TARGET LOOP
 ------------------------------------------------------------
-local function refreshPlayerList()
-    for _, child in pairs(playerListFrame:GetChildren()) do
-        if child:IsA("TextButton") then child:Destroy() end
-    end
-    
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= plr then
-            local pBtn = Instance.new("TextButton")
-            pBtn.Size = UDim2.new(1, 0, 0, 25)
-            pBtn.BackgroundColor3 = Color3.fromRGB(30, 15, 10)
-            pBtn.BorderColor3 = Color3.fromRGB(255, 100, 0)
-            pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            pBtn.Font = Enum.Font.SourceSansBold
-            pBtn.TextSize = 12
-            pBtn.Text = p.Name
-            pBtn.Parent = playerListFrame
-
-            pBtn.MouseButton1Click:Connect(function()
-                targetPlayerName = p.Name
-                b11.Text = "Target: " .. p.Name
-                playerListFrame.Visible = false
-            end)
-        end
-    end
-end
-
-b11.MouseButton1Click:Connect(function()
-    playerListFrame.Visible = not playerListFrame.Visible
-    if playerListFrame.Visible then refreshPlayerList() end
-end)
-
 b12.MouseButton1Click:Connect(function()
     flingTargetEnabled = not flingTargetEnabled
     b12.Text = flingTargetEnabled and "Fling Target: ON" or "Fling Target: OFF"
