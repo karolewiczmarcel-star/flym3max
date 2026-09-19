@@ -1,8 +1,10 @@
--- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP + Triggerbot + Alt-Quit + Spinbot + Auto Kill All + Auto Kill Murder
+-- MM2 FULL MENU
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
 local uis = game:GetService("UserInputService")
+local vu = game:GetService("VirtualUser")
+local tweenService = game:GetService("TweenService")
 
 local flying = false
 local noclip = false
@@ -14,21 +16,25 @@ local altQuitEnabled = false
 local spinbotEnabled = false
 local autoKillAll = false
 local autoKillMurder = false
+local autoFarmCoins = false
+local antiFling = false
+local antiAfk = false
+
+local targetPlayerName = nil
+local flingTargetEnabled = false
 
 local flySpeed = 60
 local walkSpeedVal = 32
 local spinSpeedVal = 50
+local farmSpeed = 17
 
--- Czyszczenie starego GUI
-pcall(function()
-    if game.CoreGui:FindFirstChild("FlyGuiMM2") then
-        game.CoreGui.FlyGuiMM2:Destroy()
-    end
-end)
+if game.CoreGui:FindFirstChild("Nigga67") then
+    game.CoreGui.Nigga67:Destroy()
+end
 
 -- GUI
 local g = Instance.new("ScreenGui")
-g.Name = "FlyGuiMM2"
+g.Name = "Nigga67"
 g.ResetOnSpawn = false
 g.Parent = game.CoreGui
 
@@ -41,9 +47,28 @@ mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 2
 mainFrame.BorderColor3 = Color3.fromRGB(255, 120, 0)
 mainFrame.Active = true
-mainFrame.Draggable = false
+mainFrame.Draggable = true
 mainFrame.Visible = true
 mainFrame.Parent = g
+
+-- Ogień w rogach GUI
+local firePositions = {
+    UDim2.new(0, 4, 0, 4),
+    UDim2.new(1, -24, 0, 4),
+    UDim2.new(0, 4, 1, -24),
+    UDim2.new(1, -24, 1, -24)
+}
+
+for _, pos in ipairs(firePositions) do
+    local fireLabel = Instance.new("TextLabel")
+    fireLabel.Size = UDim2.new(0, 20, 0, 20)
+    fireLabel.Position = pos
+    fireLabel.BackgroundTransparency = 1
+    fireLabel.Text = "🔥"
+    fireLabel.TextSize = 16
+    fireLabel.ZIndex = 20
+    fireLabel.Parent = mainFrame
+end
 
 -- Tytuł Menu
 local title = Instance.new("TextLabel")
@@ -51,7 +76,7 @@ title.Size = UDim2.new(1, 0, 0, 35)
 title.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
 title.BackgroundTransparency = 0.2
 title.BorderSizePixel = 0
-title.Text = "MM2 MENU"
+title.Text = "Nigga67"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 16
 title.Font = Enum.Font.SourceSansBold
@@ -63,7 +88,7 @@ scrollFrame.Size = UDim2.new(0.9, 0, 0.88, 0)
 scrollFrame.Position = UDim2.new(0.05, 0, 0.10, 0)
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0
-scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 600)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 910)
 scrollFrame.ScrollBarThickness = 4
 scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
 scrollFrame.Parent = mainFrame
@@ -186,60 +211,169 @@ sf3.Parent = sb3
 local b9 = createButton("Auto Kill All: OFF", 15)
 local b10 = createButton("Auto Kill Murder: OFF", 16)
 
--- OBSŁUGA SUWAKÓW MYSZKĄ
-local dragging1, dragging2, dragging3 = false, false, false
+-- PRZYCISKI DO TARGET FLINGA
+local b11 = createButton("Target: NONE", 17)
+local b12 = createButton("Fling Target: OFF", 18)
+
+-- AUTO FARM COINS
+local b13 = createButton("Auto Farm Coins: OFF", 19)
+
+-- SUWAK FARM SPEED
+local sl4 = Instance.new("TextLabel")
+sl4.Size = UDim2.new(0.95, 0, 0, 12)
+sl4.BackgroundTransparency = 1
+sl4.TextColor3 = Color3.fromRGB(255, 180, 100)
+sl4.TextSize = 11
+sl4.Font = Enum.Font.SourceSansBold
+sl4.Text = "Farm Speed: 17"
+sl4.LayoutOrder = 20
+sl4.Parent = scrollFrame
+
+local sb4 = Instance.new("TextButton")
+sb4.Size = UDim2.new(0.95, 0, 0, 10)
+sb4.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
+sb4.BorderSizePixel = 1
+sb4.BorderColor3 = Color3.fromRGB(255, 120, 0)
+sb4.Text = ""
+sb4.AutoButtonColor = false
+sb4.LayoutOrder = 21
+sb4.Parent = scrollFrame
+
+local sf4 = Instance.new("Frame")
+sf4.Size = UDim2.new(0.06, 0, 1, 0)
+sf4.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+sf4.BorderSizePixel = 0
+sf4.Parent = sb4
+
+-- ANTI-FLING & ANTI-AFK
+local b14 = createButton("Anti-Fling: OFF", 22)
+local b15 = createButton("Anti-AFK: OFF", 23)
+
+-- KONTENER NA LISTĘ GRACZY
+local playerListFrame = Instance.new("ScrollingFrame")
+playerListFrame.Size = UDim2.new(0.9, 0, 0.7, 0)
+playerListFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
+playerListFrame.BackgroundColor3 = Color3.fromRGB(10, 5, 5)
+playerListFrame.BorderColor3 = Color3.fromRGB(255, 50, 0)
+playerListFrame.BorderSizePixel = 2
+playerListFrame.ZIndex = 10
+playerListFrame.Visible = false
+playerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+playerListFrame.ScrollBarThickness = 6
+playerListFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
+playerListFrame.Parent = mainFrame
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.Padding = UDim.new(0, 2)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Parent = playerListFrame
+
+-- OBSŁUGA SUWAKÓW
+local dragging1, dragging2, dragging3, dragging4 = false, false, false, false
 
 sb1.MouseButton1Down:Connect(function() dragging1 = true end)
 sb2.MouseButton1Down:Connect(function() dragging2 = true end)
 sb3.MouseButton1Down:Connect(function() dragging3 = true end)
+sb4.MouseButton1Down:Connect(function() dragging4 = true end)
 
 uis.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging1, dragging2, dragging3 = false, false, false
+        dragging1, dragging2, dragging3, dragging4 = false, false, false, false
     end
 end)
 
 uis.InputChanged:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseMovement then
         if dragging1 then
-            local posX = i.Position.X
-            local rel = math.clamp((posX - sb1.AbsolutePosition.X) / sb1.AbsoluteSize.X, 0, 1)
+            local rel = math.clamp((i.Position.X - sb1.AbsolutePosition.X) / sb1.AbsoluteSize.X, 0, 1)
             sf1.Size = UDim2.new(rel, 0, 1, 0)
             flySpeed = math.floor(10 + rel * 290)
             sl1.Text = "Fly Speed: " .. flySpeed
         elseif dragging2 then
-            local posX = i.Position.X
-            local rel = math.clamp((posX - sb2.AbsolutePosition.X) / sb2.AbsoluteSize.X, 0, 1)
+            local rel = math.clamp((i.Position.X - sb2.AbsolutePosition.X) / sb2.AbsoluteSize.X, 0, 1)
             sf2.Size = UDim2.new(rel, 0, 1, 0)
             walkSpeedVal = math.floor(16 + rel * 134)
             sl2.Text = "Walk Speed: " .. walkSpeedVal
         elseif dragging3 then
-            local posX = i.Position.X
-            local rel = math.clamp((posX - sb3.AbsolutePosition.X) / sb3.AbsoluteSize.X, 0, 1)
+            local rel = math.clamp((i.Position.X - sb3.AbsolutePosition.X) / sb3.AbsoluteSize.X, 0, 1)
             sf3.Size = UDim2.new(rel, 0, 1, 0)
             spinSpeedVal = math.floor(10 + rel * 190)
             sl3.Text = "Spin Speed: " .. spinSpeedVal
+        elseif dragging4 then
+            local rel = math.clamp((i.Position.X - sb4.AbsolutePosition.X) / sb4.AbsoluteSize.X, 0, 1)
+            sf4.Size = UDim2.new(rel, 0, 1, 0)
+            farmSpeed = math.floor(5 + rel * 95)
+            sl4.Text = "Farm Speed: " .. farmSpeed
         end
     end
 end)
 
--- SKRÓTY KLAWISZOWE (Ukrywanie P / Alt-Quit)
+-- SKRÓTY KLAWISZOWE
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
         mainFrame.Visible = not mainFrame.Visible
     elseif i.KeyCode == Enum.KeyCode.LeftAlt or i.KeyCode == Enum.KeyCode.RightAlt then
         if altQuitEnabled then
-            game:Shutdown()
+            pcall(function() game:Shutdown() end)
         end
     end
 end)
 
 ------------------------------------------------------------
--- FUNKCJA ROZPOZNAWANIA RÓL
+-- ANTI-AFK LOGIC
+------------------------------------------------------------
+b15.MouseButton1Click:Connect(function()
+    antiAfk = not antiAfk
+    b15.Text = antiAfk and "Anti-AFK: ON" or "Anti-AFK: OFF"
+    b15.BackgroundColor3 = antiAfk and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+end)
+
+plr.Idled:Connect(function()
+    if antiAfk then
+        pcall(function()
+            vu:CaptureController()
+            vu:ClickButton2(Vector2.new())
+        end)
+    end
+end)
+
+------------------------------------------------------------
+-- ANTI-FLING LOGIC
+------------------------------------------------------------
+b14.MouseButton1Click:Connect(function()
+    antiFling = not antiFling
+    b14.Text = antiFling and "Anti-Fling: ON" or "Anti-Fling: OFF"
+    b14.BackgroundColor3 = antiFling and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+end)
+
+runService.Stepped:Connect(function()
+    if antiFling and plr.Character then
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= plr and player.Character then
+                for _, part in pairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end
+
+        if not flying and not flingTargetEnabled then
+            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                if hrp.Velocity.Magnitude > 100 then hrp.Velocity = Vector3.new(0, 0, 0) end
+                if hrp.RotVelocity.Magnitude > 100 then hrp.RotVelocity = Vector3.new(0, 0, 0) end
+            end
+        end
+    end
+end)
+
+------------------------------------------------------------
+-- LOGIKA RÓL I WERYFIKACJI
 ------------------------------------------------------------
 local function getRole(player)
-    if not player.Character then return "Innocent" end
+    if not player or not player.Character then return "Innocent" end
     local function checkContainer(c)
         if not c then return nil end
         for _, item in pairs(c:GetChildren()) do
@@ -254,8 +388,109 @@ local function getRole(player)
     return checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character) or "Innocent"
 end
 
+local function isTargetValid(target)
+    if not target or target == plr then return false end
+    local char = target.Character
+    if not char then return false end
+
+    local hum = char:FindFirstChild("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+
+    if not hum or not hrp or hum.Health <= 0 then return false end
+    if char:FindFirstChildOfClass("ForceField") then return false end
+
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("SpawnLocation") or (obj.Name:lower():find("lobby") and obj:IsA("BasePart")) then
+            if (hrp.Position - obj.Position).Magnitude < 100 then
+                return false
+            end
+        end
+    end
+    return true
+end
+
 ------------------------------------------------------------
--- AUTO KILL MURDER (DLA POSIADACZA BRONI)
+-- AUTO FARM COINS
+------------------------------------------------------------
+local currentTween = nil
+
+b13.MouseButton1Click:Connect(function()
+    autoFarmCoins = not autoFarmCoins
+    b13.Text = autoFarmCoins and "Auto Farm Coins: ON" or "Auto Farm Coins: OFF"
+    b13.BackgroundColor3 = autoFarmCoins and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+    
+    if not autoFarmCoins then
+        if currentTween then
+            currentTween:Cancel()
+            currentTween = nil
+        end
+        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            plr.Character.Humanoid.PlatformStand = false
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.05)
+        if autoFarmCoins and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = plr.Character.HumanoidRootPart
+            local hum = plr.Character:FindFirstChild("Humanoid")
+            
+            local nearestCoin = nil
+            local shortestDistance = math.huge
+            
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and (v.Name == "Coin_Server" or v.Name == "Coin" or v.Name:lower():find("coin")) then
+                    if v.Transparency < 1 and v.Parent then
+                        local dist = (hrp.Position - v.Position).Magnitude
+                        if dist < shortestDistance then
+                            shortestDistance = dist
+                            nearestCoin = v
+                        end
+                    end
+                end
+            end
+            
+            if nearestCoin and autoFarmCoins then
+                if hum then hum.PlatformStand = true end
+                
+                for _, part in pairs(plr.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = false end
+                end
+                
+                hrp.Velocity = Vector3.new(0, 0, 0)
+                hrp.RotVelocity = Vector3.new(0, 0, 0)
+                
+                local distToCoin = (nearestCoin.Position - hrp.Position).Magnitude
+                local travelTime = distToCoin / math.clamp(farmSpeed, 5, 25)
+
+                local tweenInfo = TweenInfo.new(travelTime, Enum.EasingStyle.Linear)
+                currentTween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(nearestCoin.Position)})
+                currentTween:Play()
+                
+                local completed = false
+                local conn
+                conn = currentTween.Completed:Connect(function()
+                    completed = true
+                    conn:Disconnect()
+                end)
+                
+                while not completed and autoFarmCoins and nearestCoin.Parent and nearestCoin.Transparency < 1 do
+                    task.wait(0.05)
+                end
+                
+                if currentTween then currentTween:Cancel() end
+                task.wait(0.02)
+            else
+                if hum then hum.PlatformStand = false end
+            end
+        end
+    end
+end)
+
+------------------------------------------------------------
+-- AUTO KILL MURDER
 ------------------------------------------------------------
 b10.MouseButton1Click:Connect(function()
     autoKillMurder = not autoKillMurder
@@ -267,7 +502,6 @@ task.spawn(function()
     while true do
         task.wait(0.1)
         if autoKillMurder and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            -- Wyciąganie pistoletu z eq
             local gun = plr.Character:FindFirstChildOfClass("Tool")
             if not (gun and (gun.Name:lower():find("gun") or gun.Name:lower():find("revolver") or gun.Name:lower():find("pistol"))) then
                 local bpGun = plr.Backpack:FindFirstChildOfClass("Tool")
@@ -280,16 +514,12 @@ task.spawn(function()
             if gun then
                 for _, target in pairs(game.Players:GetPlayers()) do
                     if not autoKillMurder then break end
-                    if target ~= plr and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and target.Character:FindFirstChild("Humanoid") then
-                        if target.Character.Humanoid.Health > 0 and getRole(target) == "Murderer" then
-                            local targetHrp = target.Character.HumanoidRootPart
-                            local myHrp = plr.Character.HumanoidRootPart
-                            
-                            -- Teleportacja przed mordercę i natychmiastowy strzał
-                            myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, -3) * CFrame.Angles(0, math.rad(180), 0)
-                            gun:Activate()
-                            task.wait(0.2)
-                        end
+                    if isTargetValid(target) and getRole(target) == "Murderer" then
+                        local targetHrp = target.Character.HumanoidRootPart
+                        local myHrp = plr.Character.HumanoidRootPart
+                        myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, -3) * CFrame.Angles(0, math.rad(180), 0)
+                        gun:Activate()
+                        task.wait(0.2)
                     end
                 end
             end
@@ -298,7 +528,7 @@ task.spawn(function()
 end)
 
 ------------------------------------------------------------
--- AUTO KILL ALL (TYLKO MORDERCA)
+-- AUTO KILL ALL
 ------------------------------------------------------------
 b9.MouseButton1Click:Connect(function()
     autoKillAll = not autoKillAll
@@ -323,15 +553,12 @@ task.spawn(function()
                 if knife then
                     for _, target in pairs(game.Players:GetPlayers()) do
                         if not autoKillAll then break end
-                        if target ~= plr and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and target.Character:FindFirstChild("Humanoid") then
-                            if target.Character.Humanoid.Health > 0 then
-                                local targetHrp = target.Character.HumanoidRootPart
-                                local myHrp = plr.Character.HumanoidRootPart
-                                
-                                myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 1)
-                                knife:Activate()
-                                task.wait(0.2)
-                            end
+                        if isTargetValid(target) then
+                            local targetHrp = target.Character.HumanoidRootPart
+                            local myHrp = plr.Character.HumanoidRootPart
+                            myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 1)
+                            knife:Activate()
+                            task.wait(0.2)
                         end
                     end
                 end
@@ -347,7 +574,6 @@ b8.MouseButton1Click:Connect(function()
     spinbotEnabled = not spinbotEnabled
     b8.Text = spinbotEnabled and "Spinbot: ON" or "Spinbot: OFF"
     b8.BackgroundColor3 = spinbotEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-    
     if not spinbotEnabled and plr.Character and plr.Character:FindFirstChild("Humanoid") then
         plr.Character.Humanoid.AutoRotate = true
     end
@@ -357,7 +583,6 @@ runService.RenderStepped:Connect(function()
     if spinbotEnabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = plr.Character.HumanoidRootPart
         local hum = plr.Character:FindFirstChild("Humanoid")
-        
         if hum then hum.AutoRotate = false end
         hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeedVal), 0)
     end
@@ -373,7 +598,7 @@ b7.MouseButton1Click:Connect(function()
 end)
 
 ------------------------------------------------------------
--- TRIGGERBOT (TYLKO DLA SZERYFA PRZECIWKO MORDERCY)
+-- TRIGGERBOT
 ------------------------------------------------------------
 b6.MouseButton1Click:Connect(function()
     triggerbot = not triggerbot
@@ -396,10 +621,8 @@ runService.RenderStepped:Connect(function()
                     local hitChar = result.Instance:FindFirstAncestorOfClass("Model")
                     if hitChar then
                         local targetPlayer = game.Players:GetPlayerFromCharacter(hitChar)
-                        if targetPlayer and targetPlayer ~= plr then
-                            if getRole(targetPlayer) == "Murderer" then
-                                tool:Activate()
-                            end
+                        if targetPlayer and targetPlayer ~= plr and getRole(targetPlayer) == "Murderer" then
+                            tool:Activate()
                         end
                     end
                 end
@@ -409,7 +632,7 @@ runService.RenderStepped:Connect(function()
 end)
 
 ------------------------------------------------------------
--- AUTO TP TO GUN + PAUZA & POWRÓT
+-- AUTO TP TO GUN
 ------------------------------------------------------------
 local originalPos = nil
 local isTeleporting = false
@@ -418,7 +641,6 @@ b5.MouseButton1Click:Connect(function()
     autoGunTP = not autoGunTP
     b5.Text = autoGunTP and "Auto TP Gun: ON" or "Auto TP Gun: OFF"
     b5.BackgroundColor3 = autoGunTP and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-    
     if not autoGunTP then
         isTeleporting = false
         originalPos = nil
@@ -438,9 +660,7 @@ runService.RenderStepped:Connect(function()
             hrp.CFrame = gunDrop.CFrame + Vector3.new(0, 1, 0)
         else
             if isTeleporting then
-                if originalPos then
-                    hrp.CFrame = originalPos
-                end
+                if originalPos then hrp.CFrame = originalPos end
                 isTeleporting = false
                 originalPos = nil
             end
@@ -465,7 +685,6 @@ runService.RenderStepped:Connect(function(dt)
     if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = plr.Character.HumanoidRootPart
         local hum = plr.Character:FindFirstChild("Humanoid")
-        
         if hum then 
             hum.PlatformStand = true 
             hum.AutoRotate = false
@@ -542,7 +761,6 @@ runService.RenderStepped:Connect(function()
         if player ~= plr and player.Character then
             local char = player.Character
             local head = char:FindFirstChild("Head")
-            
             if espEnabled and head then
                 local role = getRole(player)
                 local color = getRoleColor(role)
@@ -573,6 +791,63 @@ runService.RenderStepped:Connect(function()
             else
                 if char:FindFirstChild("ESPHighlight") then char.ESPHighlight:Destroy() end
                 if head and head:FindFirstChild("ESPLabel") then head.ESPLabel:Destroy() end
+            end
+        end
+    end
+end)
+
+------------------------------------------------------------
+-- LISTA GRACZY I FLING TARGET
+------------------------------------------------------------
+local function refreshPlayerList()
+    for _, child in pairs(playerListFrame:GetChildren()) do
+        if child:IsA("TextButton") then child:Destroy() end
+    end
+    
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= plr then
+            local pBtn = Instance.new("TextButton")
+            pBtn.Size = UDim2.new(1, 0, 0, 25)
+            pBtn.BackgroundColor3 = Color3.fromRGB(30, 15, 10)
+            pBtn.BorderColor3 = Color3.fromRGB(255, 100, 0)
+            pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            pBtn.Font = Enum.Font.SourceSansBold
+            pBtn.TextSize = 12
+            pBtn.Text = p.Name
+            pBtn.Parent = playerListFrame
+
+            pBtn.MouseButton1Click:Connect(function()
+                targetPlayerName = p.Name
+                b11.Text = "Target: " .. p.Name
+                playerListFrame.Visible = false
+            end)
+        end
+    end
+end
+
+b11.MouseButton1Click:Connect(function()
+    playerListFrame.Visible = not playerListFrame.Visible
+    if playerListFrame.Visible then refreshPlayerList() end
+end)
+
+b12.MouseButton1Click:Connect(function()
+    flingTargetEnabled = not flingTargetEnabled
+    b12.Text = flingTargetEnabled and "Fling Target: ON" or "Fling Target: OFF"
+    b12.BackgroundColor3 = flingTargetEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+end)
+
+task.spawn(function()
+    while true do
+        task.wait()
+        if flingTargetEnabled and targetPlayerName then
+            local target = game.Players:FindFirstChild(targetPlayerName)
+            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local myHrp = plr.Character.HumanoidRootPart
+                local targetHrp = target.Character.HumanoidRootPart
+                
+                myHrp.CFrame = targetHrp.CFrame
+                myHrp.Velocity = Vector3.new(99999, 99999, 99999)
+                myHrp.RotVelocity = Vector3.new(99999, 99999, 99999)
             end
         end
     end
