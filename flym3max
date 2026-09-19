@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack (Tło: Emotka Ognia 🔥 - FIX)
+-- Fly + Noclip + ESP MM2 + Speed Hack (Tło: Ogromny Ogień ImageLabel)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -25,10 +25,10 @@ g.Name = "FlyGuiMM2"
 g.ResetOnSpawn = false
 g.Parent = game.CoreGui
 
--- Główna przezroczysta ramka na środku
+-- Główny kontener (powiększony)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 280, 0, 380)
-mainFrame.Position = UDim2.new(0.5, -140, 0.5, -190)
+mainFrame.Size = UDim2.new(0, 320, 0, 420)
+mainFrame.Position = UDim2.new(0.5, -160, 0.5, -210)
 mainFrame.BackgroundTransparency = 1
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = false
@@ -36,40 +36,39 @@ mainFrame.Draggable = false
 mainFrame.Visible = true
 mainFrame.Parent = g
 
--- WIELKA EMOTKA OGNIA JAKO TŁO
-local fireBg = Instance.new("TextLabel")
+-- DUŻA GRAFIKA OGNIA W TLE
+local fireBg = Instance.new("ImageLabel")
 fireBg.Size = UDim2.new(1, 0, 1, 0)
 fireBg.Position = UDim2.new(0, 0, 0, 0)
 fireBg.BackgroundTransparency = 1
-fireBg.Text = "🔥"
-fireBg.TextSize = 260
+fireBg.Image = "rbxassetid://13840333256" -- Tekstura płomienia HD
 fireBg.ZIndex = 1
 fireBg.Parent = mainFrame
 
--- Układ przycisków wewnątrz ognia
+-- Kontener na przyciski idealnie wewnątrz płomienia
 local f = Instance.new("Frame")
-f.Size = UDim2.new(0.75, 0, 0.65, 0)
-f.Position = UDim2.new(0.125, 0, 0.22, 0)
+f.Size = UDim2.new(0.7, 0, 0.55, 0)
+f.Position = UDim2.new(0.15, 0, 0.28, 0)
 f.BackgroundTransparency = 1
 f.BorderSizePixel = 0
 f.ZIndex = 2
 f.Parent = mainFrame
 
 local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 4)
+layout.Padding = UDim.new(0, 6)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 layout.Parent = f
 
 local function createButton(text, order)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 24)
-    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    btn.BackgroundTransparency = 0.2
+    btn.Size = UDim2.new(1, 0, 0, 26)
+    btn.BackgroundColor3 = Color3.fromRGB(20, 5, 5)
+    btn.BackgroundTransparency = 0.25
     btn.BorderSizePixel = 1
     btn.BorderColor3 = Color3.fromRGB(255, 100, 0)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 12
+    btn.TextSize = 13
     btn.Font = Enum.Font.SourceSansBold
     btn.Text = text
     btn.LayoutOrder = order
@@ -85,10 +84,10 @@ local b4 = createButton("ESP: OFF", 4)
 
 -- Suwak Fly Speed
 local sl1 = Instance.new("TextLabel")
-sl1.Size = UDim2.new(1, 0, 0, 12)
+sl1.Size = UDim2.new(1, 0, 0, 14)
 sl1.BackgroundTransparency = 1
 sl1.TextColor3 = Color3.fromRGB(255, 255, 255)
-sl1.TextSize = 11
+sl1.TextSize = 12
 sl1.Font = Enum.Font.SourceSansBold
 sl1.Text = "Fly Speed: 60"
 sl1.LayoutOrder = 5
@@ -96,9 +95,9 @@ sl1.ZIndex = 3
 sl1.Parent = f
 
 local sb1 = Instance.new("Frame")
-sb1.Size = UDim2.new(1, 0, 0, 8)
-sb1.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-sb1.BackgroundTransparency = 0.2
+sb1.Size = UDim2.new(1, 0, 0, 10)
+sb1.BackgroundColor3 = Color3.fromRGB(20, 5, 5)
+sb1.BackgroundTransparency = 0.25
 sb1.BorderSizePixel = 1
 sb1.BorderColor3 = Color3.fromRGB(255, 100, 0)
 sb1.LayoutOrder = 6
@@ -114,10 +113,10 @@ sf1.Parent = sb1
 
 -- Suwak Speed Hack
 local sl2 = Instance.new("TextLabel")
-sl2.Size = UDim2.new(1, 0, 0, 12)
+sl2.Size = UDim2.new(1, 0, 0, 14)
 sl2.BackgroundTransparency = 1
 sl2.TextColor3 = Color3.fromRGB(255, 255, 255)
-sl2.TextSize = 11
+sl2.TextSize = 12
 sl2.Font = Enum.Font.SourceSansBold
 sl2.Text = "Walk Speed: 32"
 sl2.LayoutOrder = 7
@@ -125,9 +124,9 @@ sl2.ZIndex = 3
 sl2.Parent = f
 
 local sb2 = Instance.new("Frame")
-sb2.Size = UDim2.new(1, 0, 0, 8)
-sb2.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-sb2.BackgroundTransparency = 0.2
+sb2.Size = UDim2.new(1, 0, 0, 10)
+sb2.BackgroundColor3 = Color3.fromRGB(20, 5, 5)
+sb2.BackgroundTransparency = 0.25
 sb2.BorderSizePixel = 1
 sb2.BorderColor3 = Color3.fromRGB(255, 100, 0)
 sb2.LayoutOrder = 8
@@ -149,7 +148,7 @@ uis.InputBegan:Connect(function(i, gp)
     end
 end)
 
--- BEZBŁĘDNA OBSŁUGA SUWAKÓW
+-- OBSŁUGA SUWAKÓW
 local drag1, drag2 = false, false
 
 sb1.InputBegan:Connect(function(i) 
@@ -190,7 +189,7 @@ end)
 b1.MouseButton1Click:Connect(function()
     flying = not flying
     b1.Text = flying and "Fly: ON" or "Fly: OFF"
-    b1.BackgroundColor3 = flying and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(20, 20, 20)
+    b1.BackgroundColor3 = flying and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(20, 5, 5)
     if not flying and plr.Character and plr.Character:FindFirstChild("Humanoid") then
         plr.Character.Humanoid.PlatformStand = false
         plr.Character.Humanoid.AutoRotate = true
@@ -232,7 +231,7 @@ end)
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
     b2.Text = noclip and "Noclip: ON" or "Noclip: OFF"
-    b2.BackgroundColor3 = noclip and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(20, 20, 20)
+    b2.BackgroundColor3 = noclip and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(20, 5, 5)
 end)
 
 runService.Stepped:Connect(function()
@@ -249,7 +248,7 @@ end)
 b3.MouseButton1Click:Connect(function()
     speedHack = not speedHack
     b3.Text = speedHack and "Speed Hack: ON" or "Speed Hack: OFF"
-    b3.BackgroundColor3 = speedHack and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(20, 20, 20)
+    b3.BackgroundColor3 = speedHack and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(20, 5, 5)
 end)
 
 runService.RenderStepped:Connect(function()
@@ -286,7 +285,7 @@ end
 b4.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     b4.Text = espEnabled and "ESP: ON" or "ESP: OFF"
-    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(20, 20, 20)
+    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(20, 5, 5)
 end)
 
 runService.RenderStepped:Connect(function()
