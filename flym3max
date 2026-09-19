@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack (Wielka Emotka Ognia)
+-- Fly + Noclip + ESP MM2 + Speed Hack (Tło: Naspamowane 🔥)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -25,10 +25,10 @@ g.Name = "FlyGuiMM2"
 g.ResetOnSpawn = false
 g.Parent = game.CoreGui
 
--- Główny przezroczysty kontener
+-- Główny kontener
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 380)
-mainFrame.Position = UDim2.new(0.5, -150, 0.5, -190)
+mainFrame.Size = UDim2.new(0, 240, 0, 320)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -160)
 mainFrame.BackgroundTransparency = 1
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = false
@@ -36,21 +36,22 @@ mainFrame.Draggable = false
 mainFrame.Visible = true
 mainFrame.Parent = g
 
--- GIGANTYCZNA EMOTKA OGNIA
+-- NASPAMOWANE EMOTKI OGNIA W TLE
 local fireBg = Instance.new("TextLabel")
 fireBg.Size = UDim2.new(1, 0, 1, 0)
 fireBg.Position = UDim2.new(0, 0, 0, 0)
 fireBg.BackgroundTransparency = 1
-fireBg.Text = "🔥"
-fireBg.TextScaled = true
-fireBg.Font = Enum.Font.FredokaOne
+fireBg.Text = "🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥"
+fireBg.TextSize = 22
+fireBg.Font = Enum.Font.SourceSansBold
+fireBg.TextWrapped = true
 fireBg.ZIndex = 1
 fireBg.Parent = mainFrame
 
 -- Układ elementów na ogniu
 local f = Instance.new("Frame")
-f.Size = UDim2.new(0.65, 0, 0.5, 0)
-f.Position = UDim2.new(0.175, 0, 0.3, 0)
+f.Size = UDim2.new(0.85, 0, 0.85, 0)
+f.Position = UDim2.new(0.075, 0, 0.075, 0)
 f.BackgroundTransparency = 1
 f.BorderSizePixel = 0
 f.ZIndex = 2
@@ -66,7 +67,7 @@ local function createButton(text, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 24)
     btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    btn.BackgroundTransparency = 0.4
+    btn.BackgroundTransparency = 0.3
     btn.BorderSizePixel = 1
     btn.BorderColor3 = Color3.fromRGB(255, 120, 0)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -99,7 +100,7 @@ sl1.Parent = f
 local sb1 = Instance.new("Frame")
 sb1.Size = UDim2.new(1, 0, 0, 8)
 sb1.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-sb1.BackgroundTransparency = 0.4
+sb1.BackgroundTransparency = 0.3
 sb1.BorderSizePixel = 1
 sb1.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb1.LayoutOrder = 6
@@ -128,7 +129,7 @@ sl2.Parent = f
 local sb2 = Instance.new("Frame")
 sb2.Size = UDim2.new(1, 0, 0, 8)
 sb2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-sb2.BackgroundTransparency = 0.4
+sb2.BackgroundTransparency = 0.3
 sb2.BorderSizePixel = 1
 sb2.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb2.LayoutOrder = 8
