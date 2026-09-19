@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP + Triggerbot + Alt-Quit + Spinbot + Auto Kill All
+-- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP + Triggerbot + Alt-Quit + Spinbot + Auto Kill All + Auto Kill Murder
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -13,6 +13,7 @@ local triggerbot = false
 local altQuitEnabled = false
 local spinbotEnabled = false
 local autoKillAll = false
+local autoKillMurder = false
 
 local flySpeed = 60
 local walkSpeedVal = 32
@@ -33,8 +34,8 @@ g.Parent = game.CoreGui
 
 -- Główny kontener
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 240, 0, 520)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -260)
+mainFrame.Size = UDim2.new(0, 240, 0, 560)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -280)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 2
@@ -62,7 +63,7 @@ scrollFrame.Size = UDim2.new(0.9, 0, 0.88, 0)
 scrollFrame.Position = UDim2.new(0.05, 0, 0.10, 0)
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0
-scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 550)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 600)
 scrollFrame.ScrollBarThickness = 4
 scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
 scrollFrame.Parent = mainFrame
@@ -183,6 +184,7 @@ sf3.BorderSizePixel = 0
 sf3.Parent = sb3
 
 local b9 = createButton("Auto Kill All: OFF", 15)
+local b10 = createButton("Auto Kill Murder: OFF", 16)
 
 -- OBSŁUGA SUWAKÓW MYSZKĄ
 local dragging1, dragging2, dragging3 = false, false, false
@@ -253,6 +255,49 @@ local function getRole(player)
 end
 
 ------------------------------------------------------------
+-- AUTO KILL MURDER (DLA POSIADACZA BRONI)
+------------------------------------------------------------
+b10.MouseButton1Click:Connect(function()
+    autoKillMurder = not autoKillMurder
+    b10.Text = autoKillMurder and "Auto Kill Murder: ON" or "Auto Kill Murder: OFF"
+    b10.BackgroundColor3 = autoKillMurder and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if autoKillMurder and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            -- Wyciąganie pistoletu z eq
+            local gun = plr.Character:FindFirstChildOfClass("Tool")
+            if not (gun and (gun.Name:lower():find("gun") or gun.Name:lower():find("revolver") or gun.Name:lower():find("pistol"))) then
+                local bpGun = plr.Backpack:FindFirstChildOfClass("Tool")
+                if bpGun and (bpGun.Name:lower():find("gun") or bpGun.Name:lower():find("revolver") or bpGun.Name:lower():find("pistol")) then
+                    plr.Character.Humanoid:EquipTool(bpGun)
+                    gun = bpGun
+                end
+            end
+
+            if gun then
+                for _, target in pairs(game.Players:GetPlayers()) do
+                    if not autoKillMurder then break end
+                    if target ~= plr and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and target.Character:FindFirstChild("Humanoid") then
+                        if target.Character.Humanoid.Health > 0 and getRole(target) == "Murderer" then
+                            local targetHrp = target.Character.HumanoidRootPart
+                            local myHrp = plr.Character.HumanoidRootPart
+                            
+                            -- Teleportacja przed mordercę i natychmiastowy strzał
+                            myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, -3) * CFrame.Angles(0, math.rad(180), 0)
+                            gun:Activate()
+                            task.wait(0.2)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+------------------------------------------------------------
 -- AUTO KILL ALL (TYLKO MORDERCA)
 ------------------------------------------------------------
 b9.MouseButton1Click:Connect(function()
@@ -266,7 +311,6 @@ task.spawn(function()
         task.wait(0.1)
         if autoKillAll and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
             if getRole(plr) == "Murderer" then
-                -- Wyciąganie noża z plecaka
                 local knife = plr.Character:FindFirstChildOfClass("Tool")
                 if not (knife and (knife.Name:lower():find("knife") or knife.Name:lower():find("blade") or knife.Name:lower():find("nóż"))) then
                     local bpKnife = plr.Backpack:FindFirstChildOfClass("Tool")
@@ -284,7 +328,6 @@ task.spawn(function()
                                 local targetHrp = target.Character.HumanoidRootPart
                                 local myHrp = plr.Character.HumanoidRootPart
                                 
-                                -- Teleportacja za plecy gracza i atak
                                 myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 1)
                                 knife:Activate()
                                 task.wait(0.2)
