@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP Switch (Pomarańczowe GUI)
+-- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP Switch (Pomarańczowe nieruchome GUI)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -26,16 +26,16 @@ g.Name = "FlyGuiMM2"
 g.ResetOnSpawn = false
 g.Parent = game.CoreGui
 
--- Główny kontener
+-- Główny kontener (Nieruchomy - Draggable = false)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 240, 0, 350)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -175)
+mainFrame.Size = UDim2.new(0, 240, 0, 360)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -180)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 2
 mainFrame.BorderColor3 = Color3.fromRGB(255, 120, 0)
 mainFrame.Active = true
-mainFrame.Draggable = true
+mainFrame.Draggable = false -- GUI NIE MOŻNA PRZESUWAĆ
 mainFrame.Visible = true
 mainFrame.Parent = g
 
@@ -54,25 +54,25 @@ title.Parent = mainFrame
 -- Kontener na elementy
 local f = Instance.new("Frame")
 f.Size = UDim2.new(0.9, 0, 0.85, 0)
-f.Position = UDim2.new(0.05, 0, 0.13, 0)
+f.Position = UDim2.new(0.05, 0, 0.12, 0)
 f.BackgroundTransparency = 1
 f.Parent = mainFrame
 
 local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 6)
+layout.Padding = UDim.new(0, 5)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 layout.Parent = f
 
 local function createButton(text, order)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 28)
+    btn.Size = UDim2.new(1, 0, 0, 26)
     btn.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
     btn.BackgroundTransparency = 0.2
     btn.BorderSizePixel = 1
     btn.BorderColor3 = Color3.fromRGB(255, 120, 0)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 13
+    btn.TextSize = 12
     btn.Font = Enum.Font.SourceSansBold
     btn.Text = text
     btn.LayoutOrder = order
@@ -136,7 +136,7 @@ sf2.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 sf2.BorderSizePixel = 0
 sf2.Parent = sb2
 
--- Ukrywanie okna (P)
+-- Ukrywanie okna (Przycisk P)
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
@@ -180,7 +180,7 @@ uis.InputChanged:Connect(function(i)
 end)
 
 ------------------------------------------------------------
--- AUTO TP TO GUN (SWITCH)
+-- AUTO TP TO GUN
 ------------------------------------------------------------
 b5.MouseButton1Click:Connect(function()
     autoGunTP = not autoGunTP
