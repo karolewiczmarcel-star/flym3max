@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack (Tło: Naspamowane 🔥)
+-- Fly + Noclip + ESP MM2 + Speed Hack (Siatka Emotek 🔥)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -27,8 +27,8 @@ g.Parent = game.CoreGui
 
 -- Główny kontener
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 240, 0, 320)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -160)
+mainFrame.Size = UDim2.new(0, 260, 0, 340)
+mainFrame.Position = UDim2.new(0.5, -130, 0.5, -170)
 mainFrame.BackgroundTransparency = 1
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = false
@@ -36,19 +36,30 @@ mainFrame.Draggable = false
 mainFrame.Visible = true
 mainFrame.Parent = g
 
--- NASPAMOWANE EMOTKI OGNIA W TLE
-local fireBg = Instance.new("TextLabel")
-fireBg.Size = UDim2.new(1, 0, 1, 0)
-fireBg.Position = UDim2.new(0, 0, 0, 0)
-fireBg.BackgroundTransparency = 1
-fireBg.Text = "🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥\n🔥🔥🔥🔥🔥🔥"
-fireBg.TextSize = 22
-fireBg.Font = Enum.Font.SourceSansBold
-fireBg.TextWrapped = true
-fireBg.ZIndex = 1
-fireBg.Parent = mainFrame
+-- KONTENER NA SIATKĘ OGNIA
+local fireGrid = Instance.new("Frame")
+fireGrid.Size = UDim2.new(1, 0, 1, 0)
+fireGrid.BackgroundTransparency = 1
+fireGrid.ZIndex = 1
+fireGrid.Parent = mainFrame
 
--- Układ elementów na ogniu
+local gridLayout = Instance.new("UIGridLayout")
+gridLayout.CellSize = UDim2.new(0, 42, 0, 42)
+gridLayout.CellPadding = UDim2.new(0, 0, 0, 0)
+gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+gridLayout.Parent = fireGrid
+
+-- Generowanie siatki emotek ognia (6x8 = 48 emotek)
+for i = 1, 48 do
+    local fLbl = Instance.new("TextLabel")
+    fLbl.BackgroundTransparency = 1
+    fLbl.Text = "🔥"
+    fLbl.TextSize = 32
+    fLbl.ZIndex = 1
+    fLbl.Parent = fireGrid
+end
+
+-- Układ elementów (przyciski na ogniu)
 local f = Instance.new("Frame")
 f.Size = UDim2.new(0.85, 0, 0.85, 0)
 f.Position = UDim2.new(0.075, 0, 0.075, 0)
@@ -58,20 +69,20 @@ f.ZIndex = 2
 f.Parent = mainFrame
 
 local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 4)
+layout.Padding = UDim.new(0, 5)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 layout.Parent = f
 
 local function createButton(text, order)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 24)
+    btn.Size = UDim2.new(1, 0, 0, 26)
     btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     btn.BackgroundTransparency = 0.3
     btn.BorderSizePixel = 1
     btn.BorderColor3 = Color3.fromRGB(255, 120, 0)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 12
+    btn.TextSize = 13
     btn.Font = Enum.Font.SourceSansBold
     btn.Text = text
     btn.LayoutOrder = order
