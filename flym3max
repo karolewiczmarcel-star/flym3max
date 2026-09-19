@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack (Tło: Emotka Ognia 🔥)
+-- Fly + Noclip + ESP MM2 + Speed Hack (Tło: Emotka Ognia 🔥 - POPRAWIONE)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -25,11 +25,12 @@ g.Name = "FlyGuiMM2"
 g.ResetOnSpawn = false
 g.Parent = game.CoreGui
 
--- Główna ramka (Przezroczysta)
+-- Główny kontener (Całkowicie przezroczysty)
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 260, 0, 360)
-mainFrame.Position = UDim2.new(0.5, -130, 0.5, -180) -- Środek ekranu
+mainFrame.Position = UDim2.new(0.5, -130, 0.5, -180)
 mainFrame.BackgroundTransparency = 1
+mainFrame.BorderSizePixel = 0
 mainFrame.Active = false
 mainFrame.Draggable = false
 mainFrame.Visible = true
@@ -45,11 +46,12 @@ fireBg.TextScaled = true
 fireBg.ZIndex = 1
 fireBg.Parent = mainFrame
 
--- Kontener na przyciski na ogniu
+-- Kontener na elementy UI
 local f = Instance.new("Frame")
 f.Size = UDim2.new(0.8, 0, 0.75, 0)
 f.Position = UDim2.new(0.1, 0, 0.15, 0)
 f.BackgroundTransparency = 1
+f.BorderSizePixel = 0
 f.ZIndex = 2
 f.Parent = mainFrame
 
@@ -62,8 +64,8 @@ layout.Parent = f
 local function createButton(text, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.9, 0, 0, 26)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-    btn.BackgroundTransparency = 0.2
+    btn.BackgroundColor3 = Color3.fromRGB(30, 10, 10)
+    btn.BackgroundTransparency = 0.3
     btn.BorderSizePixel = 1
     btn.BorderColor3 = Color3.fromRGB(255, 100, 0)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -95,8 +97,8 @@ sl1.Parent = f
 
 local sb1 = Instance.new("Frame")
 sb1.Size = UDim2.new(0.9, 0, 0, 10)
-sb1.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-sb1.BackgroundTransparency = 0.2
+sb1.BackgroundColor3 = Color3.fromRGB(30, 10, 10)
+sb1.BackgroundTransparency = 0.3
 sb1.BorderSizePixel = 1
 sb1.BorderColor3 = Color3.fromRGB(255, 100, 0)
 sb1.LayoutOrder = 6
@@ -124,8 +126,8 @@ sl2.Parent = f
 
 local sb2 = Instance.new("Frame")
 sb2.Size = UDim2.new(0.9, 0, 0, 10)
-sb2.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-sb2.BackgroundTransparency = 0.2
+sb2.BackgroundColor3 = Color3.fromRGB(30, 10, 10)
+sb2.BackgroundTransparency = 0.3
 sb2.BorderSizePixel = 1
 sb2.BorderColor3 = Color3.fromRGB(255, 100, 0)
 sb2.LayoutOrder = 8
@@ -139,7 +141,7 @@ sf2.BorderSizePixel = 0
 sf2.ZIndex = 4
 sf2.Parent = sb2
 
--- Ukrywanie okna klawiszem P
+-- Ukrywanie okna (P)
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
@@ -147,8 +149,9 @@ uis.InputBegan:Connect(function(i, gp)
     end
 end)
 
--- Obsługa suwaków
+-- Poprawiona obsługa suwaków (Naprawiono błąd 'UDim2 expected, got table')
 local drag1, drag2 = false, false
+
 sb1.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag1 = true end end)
 sb1.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag1 = false end end)
 sb2.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag2 = true end end)
@@ -156,13 +159,14 @@ sb2.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.Mous
 
 uis.InputChanged:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseMovement then
+        local mousePos = uis:GetMouseLocation()
         if drag1 then
-            local r = math.clamp((i.Position.X - sb1.AbsolutePosition.X) / sb1.AbsoluteSize.X, 0, 1)
+            local r = math.clamp((mousePos.X - sb1.AbsolutePosition.X) / sb1.AbsoluteSize.X, 0, 1)
             sf1.Size = UDim2.new(r, 0, 1, 0)
             flySpeed = math.floor(10 + r * 290)
             sl1.Text = "Fly Speed: " .. flySpeed
         elseif drag2 then
-            local r = math.clamp((i.Position.X - sb2.AbsolutePosition.X) / sb2.AbsoluteSize.X, 0, 1)
+            local r = math.clamp((mousePos.X - sb2.AbsolutePosition.X) / sb2.AbsoluteSize.X, 0, 1)
             sf2.Size = UDim2.new(r, 0, 1, 0)
             walkSpeedVal = math.floor(16 + r * 134)
             sl2.Text = "Walk Speed: " .. walkSpeedVal
@@ -176,7 +180,7 @@ end)
 b1.MouseButton1Click:Connect(function()
     flying = not flying
     b1.Text = flying and "Fly: ON" or "Fly: OFF"
-    b1.BackgroundColor3 = flying and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(40, 0, 0)
+    b1.BackgroundColor3 = flying and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(30, 10, 10)
     if not flying and plr.Character and plr.Character:FindFirstChild("Humanoid") then
         plr.Character.Humanoid.PlatformStand = false
         plr.Character.Humanoid.AutoRotate = true
@@ -218,7 +222,7 @@ end)
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
     b2.Text = noclip and "Noclip: ON" or "Noclip: OFF"
-    b2.BackgroundColor3 = noclip and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(40, 0, 0)
+    b2.BackgroundColor3 = noclip and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(30, 10, 10)
 end)
 
 runService.Stepped:Connect(function()
@@ -235,7 +239,7 @@ end)
 b3.MouseButton1Click:Connect(function()
     speedHack = not speedHack
     b3.Text = speedHack and "Speed Hack: ON" or "Speed Hack: OFF"
-    b3.BackgroundColor3 = speedHack and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(40, 0, 0)
+    b3.BackgroundColor3 = speedHack and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(30, 10, 10)
 end)
 
 runService.RenderStepped:Connect(function()
@@ -272,7 +276,7 @@ end
 b4.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     b4.Text = espEnabled and "ESP: ON" or "ESP: OFF"
-    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(40, 0, 0)
+    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(30, 10, 10)
 end)
 
 runService.RenderStepped:Connect(function()
