@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP + Triggerbot + Alt-Quit + Spinbot
+-- Fly + Noclip + ESP MM2 + Speed Hack + Auto Gun TP + Triggerbot + Alt-Quit + Spinbot + Auto Kill All
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -12,6 +12,7 @@ local autoGunTP = false
 local triggerbot = false
 local altQuitEnabled = false
 local spinbotEnabled = false
+local autoKillAll = false
 
 local flySpeed = 60
 local walkSpeedVal = 32
@@ -30,10 +31,10 @@ g.Name = "FlyGuiMM2"
 g.ResetOnSpawn = false
 g.Parent = game.CoreGui
 
--- Główny kontener (Dostosowany rozmiar)
+-- Główny kontener
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 240, 0, 480)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -240)
+mainFrame.Size = UDim2.new(0, 240, 0, 520)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -260)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 2
@@ -61,7 +62,7 @@ scrollFrame.Size = UDim2.new(0.9, 0, 0.88, 0)
 scrollFrame.Position = UDim2.new(0.05, 0, 0.10, 0)
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0
-scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 500)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 550)
 scrollFrame.ScrollBarThickness = 4
 scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
 scrollFrame.Parent = mainFrame
@@ -181,6 +182,8 @@ sf3.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 sf3.BorderSizePixel = 0
 sf3.Parent = sb3
 
+local b9 = createButton("Auto Kill All: OFF", 15)
+
 -- OBSŁUGA SUWAKÓW MYSZKĄ
 local dragging1, dragging2, dragging3 = false, false, false
 
@@ -231,6 +234,70 @@ uis.InputBegan:Connect(function(i, gp)
 end)
 
 ------------------------------------------------------------
+-- FUNKCJA ROZPOZNAWANIA RÓL
+------------------------------------------------------------
+local function getRole(player)
+    if not player.Character then return "Innocent" end
+    local function checkContainer(c)
+        if not c then return nil end
+        for _, item in pairs(c:GetChildren()) do
+            if item:IsA("Tool") then
+                local n = item.Name:lower()
+                if n:find("knife") or n:find("blade") or n:find("nóż") then return "Murderer"
+                elseif n:find("gun") or n:find("revolver") or n:find("pistol") then return "Sheriff" end
+            end
+        end
+        return nil
+    end
+    return checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character) or "Innocent"
+end
+
+------------------------------------------------------------
+-- AUTO KILL ALL (TYLKO MORDERCA)
+------------------------------------------------------------
+b9.MouseButton1Click:Connect(function()
+    autoKillAll = not autoKillAll
+    b9.Text = autoKillAll and "Auto Kill All: ON" or "Auto Kill All: OFF"
+    b9.BackgroundColor3 = autoKillAll and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if autoKillAll and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            if getRole(plr) == "Murderer" then
+                -- Wyciąganie noża z plecaka
+                local knife = plr.Character:FindFirstChildOfClass("Tool")
+                if not (knife and (knife.Name:lower():find("knife") or knife.Name:lower():find("blade") or knife.Name:lower():find("nóż"))) then
+                    local bpKnife = plr.Backpack:FindFirstChildOfClass("Tool")
+                    if bpKnife and (bpKnife.Name:lower():find("knife") or bpKnife.Name:lower():find("blade") or bpKnife.Name:lower():find("nóż")) then
+                        plr.Character.Humanoid:EquipTool(bpKnife)
+                        knife = bpKnife
+                    end
+                end
+
+                if knife then
+                    for _, target in pairs(game.Players:GetPlayers()) do
+                        if not autoKillAll then break end
+                        if target ~= plr and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and target.Character:FindFirstChild("Humanoid") then
+                            if target.Character.Humanoid.Health > 0 then
+                                local targetHrp = target.Character.HumanoidRootPart
+                                local myHrp = plr.Character.HumanoidRootPart
+                                
+                                -- Teleportacja za plecy gracza i atak
+                                myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 1)
+                                knife:Activate()
+                                task.wait(0.2)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+------------------------------------------------------------
 -- SPINBOT
 ------------------------------------------------------------
 b8.MouseButton1Click:Connect(function()
@@ -261,25 +328,6 @@ b7.MouseButton1Click:Connect(function()
     b7.Text = altQuitEnabled and "Alt-Quit: ON" or "Alt-Quit: OFF"
     b7.BackgroundColor3 = altQuitEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
 end)
-
-------------------------------------------------------------
--- FUNKCJA ROZPOZNAWANIA RÓL
-------------------------------------------------------------
-local function getRole(player)
-    if not player.Character then return "Innocent" end
-    local function checkContainer(c)
-        if not c then return nil end
-        for _, item in pairs(c:GetChildren()) do
-            if item:IsA("Tool") then
-                local n = item.Name:lower()
-                if n:find("knife") or n:find("blade") or n:find("nóż") then return "Murderer"
-                elseif n:find("gun") or n:find("revolver") or n:find("pistol") then return "Sheriff" end
-            end
-        end
-        return nil
-    end
-    return checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character) or "Innocent"
-end
 
 ------------------------------------------------------------
 -- TRIGGERBOT (TYLKO DLA SZERYFA PRZECIWKO MORDERCY)
