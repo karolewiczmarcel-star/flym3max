@@ -1,4 +1,4 @@
--- Fly + Noclip + ESP MM2 + Speed Hack (Ogniste Pomarańczowe GUI)
+-- Fly + Noclip + ESP MM2 + Speed Hack (Pomarańczowe klasyczne GUI)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -32,7 +32,7 @@ mainFrame.Position = UDim2.new(0.5, -120, 0.5, -155)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 2
-mainFrame.BorderColor3 = Color3.fromRGB(255, 100, 0)
+mainFrame.BorderColor3 = Color3.fromRGB(255, 120, 0)
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Visible = true
@@ -41,10 +41,10 @@ mainFrame.Parent = g
 -- Tytuł Menu
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 35)
-title.BackgroundColor3 = Color3.fromRGB(255, 80, 0)
+title.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
 title.BackgroundTransparency = 0.2
 title.BorderSizePixel = 0
-title.Text = "FIRE MENU"
+title.Text = "MM2 MENU"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 16
 title.Font = Enum.Font.SourceSansBold
@@ -69,7 +69,7 @@ local function createButton(text, order)
     btn.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
     btn.BackgroundTransparency = 0.2
     btn.BorderSizePixel = 1
-    btn.BorderColor3 = Color3.fromRGB(255, 100, 0)
+    btn.BorderColor3 = Color3.fromRGB(255, 120, 0)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
     btn.Font = Enum.Font.SourceSansBold
@@ -99,13 +99,13 @@ local sb1 = Instance.new("Frame")
 sb1.Size = UDim2.new(1, 0, 0, 10)
 sb1.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
 sb1.BorderSizePixel = 1
-sb1.BorderColor3 = Color3.fromRGB(255, 100, 0)
+sb1.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb1.LayoutOrder = 6
 sb1.Parent = f
 
 local sf1 = Instance.new("Frame")
 sf1.Size = UDim2.new(0.18, 0, 1, 0)
-sf1.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+sf1.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 sf1.BorderSizePixel = 0
 sf1.Parent = sb1
 
@@ -124,17 +124,17 @@ local sb2 = Instance.new("Frame")
 sb2.Size = UDim2.new(1, 0, 0, 10)
 sb2.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
 sb2.BorderSizePixel = 1
-sb2.BorderColor3 = Color3.fromRGB(255, 100, 0)
+sb2.BorderColor3 = Color3.fromRGB(255, 120, 0)
 sb2.LayoutOrder = 8
 sb2.Parent = f
 
 local sf2 = Instance.new("Frame")
 sf2.Size = UDim2.new(0.15, 0, 1, 0)
-sf2.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+sf2.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 sf2.BorderSizePixel = 0
 sf2.Parent = sb2
 
--- Ukrywanie okna (P)
+-- Ukrywanie okna (Przycisk P)
 uis.InputBegan:Connect(function(i, gp)
     if gp then return end
     if i.KeyCode == Enum.KeyCode.P then
@@ -183,7 +183,7 @@ end)
 b1.MouseButton1Click:Connect(function()
     flying = not flying
     b1.Text = flying and "Fly: ON" or "Fly: OFF"
-    b1.BackgroundColor3 = flying and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(25, 15, 5)
+    b1.BackgroundColor3 = flying and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
     if not flying and plr.Character and plr.Character:FindFirstChild("Humanoid") then
         plr.Character.Humanoid.PlatformStand = false
         plr.Character.Humanoid.AutoRotate = true
@@ -225,7 +225,7 @@ end)
 b2.MouseButton1Click:Connect(function()
     noclip = not noclip
     b2.Text = noclip and "Noclip: ON" or "Noclip: OFF"
-    b2.BackgroundColor3 = noclip and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(25, 15, 5)
+    b2.BackgroundColor3 = noclip and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
 end)
 
 runService.Stepped:Connect(function()
@@ -242,7 +242,7 @@ end)
 b3.MouseButton1Click:Connect(function()
     speedHack = not speedHack
     b3.Text = speedHack and "Speed Hack: ON" or "Speed Hack: OFF"
-    b3.BackgroundColor3 = speedHack and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(25, 15, 5)
+    b3.BackgroundColor3 = speedHack and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
 end)
 
 runService.RenderStepped:Connect(function()
@@ -279,7 +279,7 @@ end
 b4.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     b4.Text = espEnabled and "ESP: ON" or "ESP: OFF"
-    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(255, 80, 0) or Color3.fromRGB(25, 15, 5)
+    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
 end)
 
 runService.RenderStepped:Connect(function()
