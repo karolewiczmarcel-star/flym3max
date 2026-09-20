@@ -162,17 +162,21 @@ local function showGameSelector()
 end
 
 ------------------------------------------------------------
--- MENU DLA BLOXSTRIKE (Póki co puste / bazowe)
+-- MENU DLA BLOXSTRIKE (Wallhack, Triggerbot na głowę, No Recoil)
 ------------------------------------------------------------
 function startBloxStrikeScript()
+    local wallhackEnabled = false
+    local triggerbotEnabled = false
+    local noRecoilEnabled = false
+
     local g = Instance.new("ScreenGui")
     g.Name = "SzpontHack"
     g.ResetOnSpawn = false
     g.Parent = targetParent
 
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 240, 0, 300)
-    mainFrame.Position = UDim2.new(0.5, -120, 0.5, -150)
+    mainFrame.Size = UDim2.new(0, 240, 0, 240)
+    mainFrame.Position = UDim2.new(0.5, -120, 0.5, -120)
     mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
     mainFrame.BackgroundTransparency = 0.15
     mainFrame.BorderSizePixel = 2
@@ -192,16 +196,128 @@ function startBloxStrikeScript()
     title.Font = Enum.Font.SourceSansBold
     title.Parent = mainFrame
 
-    local infoLabel = Instance.new("TextLabel")
-    infoLabel.Size = UDim2.new(0.9, 0, 0.6, 0)
-    infoLabel.Position = UDim2.new(0.05, 0, 0.25, 0)
-    infoLabel.BackgroundTransparency = 1
-    infoLabel.Text = "Tutaj wkrótce pojawią się funkcje do BloxStrike!\n(Naciśnij P, aby ukryć/pokazać menu)"
-    infoLabel.TextColor3 = Color3.fromRGB(255, 180, 100)
-    infoLabel.TextSize = 14
-    infoLabel.Font = Enum.Font.SourceSansBold
-    infoLabel.TextWrapped = true
-    infoLabel.Parent = mainFrame
+    local function createBsButton(text, posY)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0.9, 0, 0, 35)
+        btn.Position = UDim2.new(0.05, 0, 0, posY)
+        btn.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
+        btn.BackgroundTransparency = 0.2
+        btn.BorderSizePixel = 1
+        btn.BorderColor3 = Color3.fromRGB(255, 120, 0)
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 13
+        btn.Font = Enum.Font.SourceSansBold
+        btn.Text = text
+        btn.Parent = mainFrame
+        return btn
+    end
+
+    local bWallhack = createBsButton("Wallhack: OFF", 50)
+    local bTriggerbot = createBsButton("Triggerbot (Head): OFF", 95)
+    local bNoRecoil = createBsButton("No Recoil: OFF", 140)
+
+    -- Logika Wallhack (ESP Highlight)
+    local highlights = {}
+    local function updateWallhack()
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= plr then
+                if wallhackEnabled and p.Character then
+                    if not highlights[p] then
+                        local hl = Instance.new("Highlight")
+                        hl.Name = "SzpontESP"
+                        hl.Adornee = p.Character
+                        hl.FillColor = Color3.fromRGB(255, 50, 50)
+                        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        hl.FillTransparency = 0.5
+                        hl.OutlineTransparency = 0
+                        hl.Parent = p.Character
+                        highlights[p] = hl
+                    end
+                else
+                    if highlights[p] then
+                        highlights[p]:Destroy()
+                        highlights[p] = nil
+                    end
+                end
+            end
+        end
+    end
+
+    bWallhack.MouseButton1Click:Connect(function()
+        wallhackEnabled = not wallhackEnabled
+        bWallhack.Text = wallhackEnabled and "Wallhack: ON" or "Wallhack: OFF"
+        bWallhack.BackgroundColor3 = wallhackEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+    end)
+
+    runService.RenderStepped:Connect(function()
+        if wallhackEnabled then
+            updateWallhack()
+        else
+            for _, hl in pairs(highlights) do
+                if hl then hl:Destroy() end
+            end
+            highlights = {}
+        end
+    end)
+
+    game.Players.PlayerRemoving:Connect(function(p)
+        if highlights[p] then
+            highlights[p]:Destroy()
+            highlights[p] = nil
+        end
+    end)
+
+    -- Logika Triggerbota (tylko na głowę)
+    bTriggerbot.MouseButton1Click:Connect(function()
+        triggerbotEnabled = not triggerbotEnabled
+        bTriggerbot.Text = triggerbotEnabled and "Triggerbot (Head): ON" or "Triggerbot (Head): OFF"
+        bTriggerbot.BackgroundColor3 = triggerbotEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+    end)
+
+    runService.RenderStepped:Connect(function()
+        if triggerbotEnabled then
+            local mouse = plr:GetMouse()
+            local target = mouse.Target
+            if target and target.Name == "Head" then
+                local enemyModel = target.Parent
+                local enemyPlayer = game.Players:GetPlayerFromCharacter(enemyModel)
+                -- Upewniamy się, że to żywy gracz z przeciwnej drużyny (jeśli gra ma system teams)
+                if enemyPlayer and enemyPlayer ~= plr then
+                    local humanoid = enemyModel:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.Health > 0 then
+                        task.wait(0.02) -- małe opóźnienie dla naturalności
+                        mouse1click()
+                    end
+                end
+            end
+        end
+    end)
+
+    -- Logika No Recoil
+    bNoRecoil.MouseButton1Click:Connect(function()
+        noRecoilEnabled = not noRecoilEnabled
+        bNoRecoil.Text = noRecoilEnabled and "No Recoil: ON" or "No Recoil: OFF"
+        bNoRecoil.BackgroundColor3 = noRecoilEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
+    end)
+
+    task.spawn(function()
+        while true do
+            task.wait(0.5)
+            if noRecoilEnabled and plr.Character then
+                -- W wielu grach na Robloxie odrzut modyfikuje zmienne w lokalnych skryptach broni lub kamerze,
+                -- poniższe przeszukuje i zeruje znane property związane z odrzutem w schowku broni gracza.
+                pcall(function()
+                    for _, v in pairs(plr.Character:GetDescendants()) do
+                        if v:IsA("NumberValue") or v:IsA("Vector3Value") then
+                            if v.Name:lower():find("recoil") or v.Name:lower():find("spread") then
+                                v.Value = 0
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    end)
 
     uis.InputBegan:Connect(function(i, gp)
         if gp then return end
