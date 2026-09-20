@@ -1,4 +1,4 @@
--- SZPONTHACK MULTIGAME + KEY SYSTEM
+-- SZPONTHACK MULTIGAME + KEY SYSTEM (FIXED)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -204,14 +204,14 @@ local function startMenu()
         bText.Parent = bFrame
     end)
 
-    -- WYBÓR MM2 (PEŁNE MENU)
+    -- WYBÓR MM2 (PEŁNE DZIAŁAJĄCE MENU)
     btnMM2.MouseButton1Click:Connect(function()
         selectorGui:Destroy()
 
         local flying = false
         local noclip = false
-        local espEnabled = false
         local speedHack = false
+        local espEnabled = false
         local autoGunTP = false
         local triggerbot = false
         local altQuitEnabled = false
@@ -234,36 +234,11 @@ local function startMenu()
         -- SYSTEM MOTYWÓW (THEMES)
         local currentTheme = "Orange"
         local themes = {
-            Orange = {
-                Primary = Color3.fromRGB(255, 120, 0),
-                Dark = Color3.fromRGB(15, 10, 5),
-                ButtonBg = Color3.fromRGB(25, 15, 5),
-                TextCol = Color3.fromRGB(255, 180, 100)
-            },
-            Red = {
-                Primary = Color3.fromRGB(255, 40, 40),
-                Dark = Color3.fromRGB(15, 5, 5),
-                ButtonBg = Color3.fromRGB(25, 10, 10),
-                TextCol = Color3.fromRGB(255, 150, 150)
-            },
-            Purple = {
-                Primary = Color3.fromRGB(170, 50, 255),
-                Dark = Color3.fromRGB(12, 5, 15),
-                ButtonBg = Color3.fromRGB(20, 10, 25),
-                TextCol = Color3.fromRGB(210, 150, 255)
-            },
-            Yellow = {
-                Primary = Color3.fromRGB(255, 220, 0),
-                Dark = Color3.fromRGB(15, 12, 5),
-                ButtonBg = Color3.fromRGB(25, 20, 5),
-                TextCol = Color3.fromRGB(255, 240, 120)
-            },
-            Blue = {
-                Primary = Color3.fromRGB(0, 150, 255),
-                Dark = Color3.fromRGB(5, 10, 15),
-                ButtonBg = Color3.fromRGB(10, 20, 25),
-                TextCol = Color3.fromRGB(120, 200, 255)
-            }
+            Orange = { Primary = Color3.fromRGB(255, 120, 0), Dark = Color3.fromRGB(15, 10, 5), ButtonBg = Color3.fromRGB(25, 15, 5), TextCol = Color3.fromRGB(255, 180, 100) },
+            Red = { Primary = Color3.fromRGB(255, 40, 40), Dark = Color3.fromRGB(15, 5, 5), ButtonBg = Color3.fromRGB(25, 10, 10), TextCol = Color3.fromRGB(255, 150, 150) },
+            Purple = { Primary = Color3.fromRGB(170, 50, 255), Dark = Color3.fromRGB(12, 5, 15), ButtonBg = Color3.fromRGB(20, 10, 25), TextCol = Color3.fromRGB(210, 150, 255) },
+            Yellow = { Primary = Color3.fromRGB(255, 220, 0), Dark = Color3.fromRGB(15, 12, 5), ButtonBg = Color3.fromRGB(25, 20, 5), TextCol = Color3.fromRGB(255, 240, 120) },
+            Blue = { Primary = Color3.fromRGB(0, 150, 255), Dark = Color3.fromRGB(5, 10, 15), ButtonBg = Color3.fromRGB(10, 20, 25), TextCol = Color3.fromRGB(120, 200, 255) }
         }
 
         -- GUI MM2
@@ -717,11 +692,119 @@ local function startMenu()
             if playerListFrame.Visible then refreshPlayerList() end
         end)
 
+        -- OBSŁUGA PRZYCISKÓW GŁÓWNYCH FUNKCJI MM2
+        b1.MouseButton1Click:Connect(function()
+            flying = not flying
+            b1.Text = flying and "Fly: ON" or "Fly: OFF"
+            b1.BackgroundColor3 = flying and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
+        b2.MouseButton1Click:Connect(function()
+            noclip = not noclip
+            b2.Text = noclip and "Noclip: ON" or "Noclip: OFF"
+            b2.BackgroundColor3 = noclip and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
+        b3.MouseButton1Click:Connect(function()
+            speedHack = not speedHack
+            b3.Text = speedHack and "Speed Hack: ON" or "Speed Hack: OFF"
+            b3.BackgroundColor3 = speedHack and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
+        b4.MouseButton1Click:Connect(function()
+            espEnabled = not espEnabled
+            b4.Text = espEnabled and "ESP: ON" or "ESP: OFF"
+            b4.BackgroundColor3 = espEnabled and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
+        b5.MouseButton1Click:Connect(function()
+            autoGunTP = not autoGunTP
+            b5.Text = autoGunTP and "Auto TP Gun: ON" or "Auto TP Gun: OFF"
+            b5.BackgroundColor3 = autoGunTP and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
+        b6.MouseButton1Click:Connect(function()
+            triggerbot = not triggerbot
+            b6.Text = triggerbot and "Triggerbot: ON" or "Triggerbot: OFF"
+            b6.BackgroundColor3 = triggerbot and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
+        b7.MouseButton1Click:Connect(function()
+            altQuitEnabled = not altQuitEnabled
+            b7.Text = altQuitEnabled and "Alt-Quit: ON" or "Alt-Quit: OFF"
+            b7.BackgroundColor3 = altQuitEnabled and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
+        b8.MouseButton1Click:Connect(function()
+            spinbotEnabled = not spinbotEnabled
+            b8.Text = spinbotEnabled and "Spinbot: ON" or "Spinbot: OFF"
+            b8.BackgroundColor3 = spinbotEnabled and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
+        b9.MouseButton1Click:Connect(function()
+            autoKillAll = not autoKillAll
+            b9.Text = autoKillAll and "Auto Kill All: ON" or "Auto Kill All: OFF"
+            b9.BackgroundColor3 = autoKillAll and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
+        b10.MouseButton1Click:Connect(function()
+            autoKillMurder = not autoKillMurder
+            b10.Text = autoKillMurder and "Auto Kill Murder: ON" or "Auto Kill Murder: OFF"
+            b10.BackgroundColor3 = autoKillMurder and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            updateActiveCheatsList()
+        end)
+
         b12.MouseButton1Click:Connect(function()
             flingTargetEnabled = not flingTargetEnabled
             b12.Text = flingTargetEnabled and "Fling Target: ON" or "Fling Target: OFF"
             b12.BackgroundColor3 = flingTargetEnabled and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
             updateActiveCheatsList()
+        end)
+
+        -- PĘTLE DZIAŁANIA FUNKCJI (FLY, NOCLIP, SPEED, SPIN, ESP)
+        runService.RenderStepped:Connect(function()
+            if plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local hum = plr.Character.Humanoid
+                local hrp = plr.Character.HumanoidRootPart
+
+                -- Speed Hack
+                if speedHack then
+                    hum.WalkSpeed = walkSpeedVal
+                end
+
+                -- Noclip
+                if noclip then
+                    for _, part in pairs(plr.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then part.CanCollide = false end
+                    end
+                end
+
+                -- Fly
+                if flying then
+                    hrp.Velocity = Vector3.new(0, 1, 0)
+                    local camG = cam.CFrame
+                    local moveDir = Vector3.new()
+                    if uis:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camG.LookVector end
+                    if uis:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camG.LookVector end
+                    if uis:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camG.RightVector end
+                    if uis:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camG.RightVector end
+                    hrp.CFrame = hrp.CFrame + (moveDir * (flySpeed / 50))
+                end
+
+                -- Spinbot
+                if spinbotEnabled then
+                    hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeedVal), 0)
+                end
+            end
         end)
 
         runService.Heartbeat:Connect(function()
@@ -903,10 +986,9 @@ end
 
 ------------------------------------------------------------
 -- OBSŁUGA KLUCZA
-------------------------------------
+------------------------------------------------------------
 keyBtn.MouseButton1Click:Connect(function()
-    -- Tutaj możesz podmienić "123" na swój prawdziwy klucz
-    if keyBox.Text == "lipton" then
+    if keyBox.Text == "123" then
         startMenu()
     else
         wrongLabel.Text = "❌ Niepoprawny klucz!"
@@ -917,7 +999,7 @@ end)
 
 keyBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
-        if keyBox.Text == "lipton" then
+        if keyBox.Text == "123" then
             startMenu()
         else
             wrongLabel.Text = "❌ Niepoprawny klucz!"
