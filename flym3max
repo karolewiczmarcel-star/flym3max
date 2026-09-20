@@ -906,7 +906,7 @@ end
 ------------------------------------
 keyBtn.MouseButton1Click:Connect(function()
     -- Tutaj możesz podmienić "123" na swój prawdziwy klucz
-    if keyBox.Text == "123" then
+    if keyBox.Text == "lipton" then
         startMenu()
     else
         wrongLabel.Text = "❌ Niepoprawny klucz!"
@@ -917,7 +917,7 @@ end)
 
 keyBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
-        if keyBox.Text == "123" then
+        if keyBox.Text == "lipton" then
             startMenu()
         else
             wrongLabel.Text = "❌ Niepoprawny klucz!"
