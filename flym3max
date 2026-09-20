@@ -1,4 +1,4 @@
--- SZPONTHACK MULTIGAME + KEY SYSTEM (FIXED)
+-- SZPONTHACK MULTIGAME + KEY SYSTEM (MM2 & BLOXSTRIKE FIX)
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
@@ -39,7 +39,7 @@ pcall(function()
 end)
 
 ------------------------------------------------------------
--- KEY SYSTEM (POMARAŃCZOWY)
+-- KEY SYSTEM
 ------------------------------------------------------------
 local keyGui = Instance.new("ScreenGui")
 keyGui.Name = "SzpontKeySystem"
@@ -302,7 +302,7 @@ function startBloxStrikeScript()
 end
 
 ------------------------------------------------------------
--- MENU DLA MM2 (POPRAWIONE PRZYCISKI I DZIAŁANIE)
+-- MENU DLA MM2 (NAPRAWIONE I STABILNE)
 ------------------------------------------------------------
 function startMM2Script()
     local flying = false
@@ -370,7 +370,7 @@ function startMM2Script()
     scrollFrame.Position = UDim2.new(0.05, 0, 0.10, 0)
     scrollFrame.BackgroundTransparency = 1
     scrollFrame.BorderSizePixel = 0
-    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 1080)
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 1200)
     scrollFrame.ScrollBarThickness = 4
     scrollFrame.ScrollBarImageColor3 = themes[currentTheme].Primary
     scrollFrame.ZIndex = 2
@@ -411,7 +411,6 @@ function startMM2Script()
     local b4 = createButton("ESP: OFF", 4)
     local b5 = createButton("Auto TP Gun: OFF", 5)
 
-    -- Slidery i etykiety
     local function createSlider(labelText, defaultVal, order)
         local lbl = Instance.new("TextLabel")
         lbl.Size = UDim2.new(0.95, 0, 0, 12)
@@ -549,65 +548,60 @@ function startMM2Script()
         cheatsScroll.CanvasSize = UDim2.new(0, 0, 0, #activeList * 25)
     end
 
-    -- Funkcja pomocnicza do toggle przycisków
-    local function setupToggle(btn, stateVar, name)
+    local function setupToggle(btn, name, callback)
+        local state = false
         btn.MouseButton1Click:Connect(function()
-            if name == "Fly" then flying = not flying
-            elseif name == "Noclip" then noclip = not noclip
-            elseif name == "Speed" then speedHack = not speedHack
-            elseif name == "ESP" then espEnabled = not espEnabled
-            elseif name == "AutoGun" then autoGunTP = not autoGunTP
-            elseif name == "Triggerbot" then triggerbot = not triggerbot
-            elseif name == "AltQuit" then altQuitEnabled = not altQuitEnabled
-            elseif name == "Spinbot" then spinbotEnabled = not spinbotEnabled
-            elseif name == "KillAll" then autoKillAll = not autoKillAll
-            elseif name == "KillMurder" then autoKillMurder = not autoKillMurder
-            elseif name == "Farm" then autoFarmCoins = not autoFarmCoins
-            elseif name == "AntiFling" then antiFling = not antiFling
-            elseif name == "AntiAfk" then antiAfk = not antiAfk
-            elseif name == "Fullbright" then fullbrightEnabled = not fullbrightEnabled
-            end
-
-            local isOn = false
-            if name == "Fly" then isOn = flying
-            elseif name == "Noclip" then isOn = noclip
-            elseif name == "Speed" then isOn = speedHack
-            elseif name == "ESP" then isOn = espEnabled
-            elseif name == "AutoGun" then isOn = autoGunTP
-            elseif name == "Triggerbot" then isOn = triggerbot
-            elseif name == "AltQuit" then isOn = altQuitEnabled
-            elseif name == "Spinbot" then isOn = spinbotEnabled
-            elseif name == "KillAll" then isOn = autoKillAll
-            elseif name == "KillMurder" then isOn = autoKillMurder
-            elseif name == "Farm" then isOn = autoFarmCoins
-            elseif name == "AntiFling" then isOn = antiFling
-            elseif name == "AntiAfk" then isOn = antiAfk
-            elseif name == "Fullbright" then isOn = fullbrightEnabled
-            end
-
-            btn.Text = name .. (isOn and ": ON" or ": OFF")
-            btn.BackgroundColor3 = isOn and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            state = not state
+            btn.Text = name .. (state and ": ON" or ": OFF")
+            btn.BackgroundColor3 = state and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+            pcall(function() callback(state) end)
             updateActiveCheatsList()
         end)
     end
 
-    setupToggle(b1, flying, "Fly")
-    setupToggle(b2, noclip, "Noclip")
-    setupToggle(b3, speedHack, "Speed")
-    setupToggle(b4, espEnabled, "ESP")
-    setupToggle(b5, autoGunTP, "AutoGun")
-    setupToggle(b6, triggerbot, "Triggerbot")
-    setupToggle(b7, altQuitEnabled, "AltQuit")
-    setupToggle(b8, spinbotEnabled, "Spinbot")
-    setupToggle(b9, autoKillAll, "KillAll")
-    setupToggle(b10, autoKillMurder, "KillMurder")
-    setupToggle(b12, flingTargetEnabled, "Fling Target")
-    setupToggle(b13, autoFarmCoins, "Farm")
-    setupToggle(b14, antiFling, "AntiFling")
-    setupToggle(b15, antiAfk, "AntiAfk")
-    setupToggle(b16, fullbrightEnabled, "Fullbright")
+    setupToggle(b1, "Fly", function(st) flying = st end)
+    setupToggle(b2, "Noclip", function(st) noclip = st end)
+    setupToggle(b3, "Speed Hack", function(st) speedHack = st end)
+    setupToggle(b4, "ESP", function(st) espEnabled = st end)
+    setupToggle(b5, "Auto TP Gun", function(st) autoGunTP = st end)
+    setupToggle(b6, "Triggerbot", function(st) triggerbot = st end)
+    setupToggle(b7, "Alt-Quit", function(st) altQuitEnabled = st end)
+    setupToggle(b8, "Spinbot", function(st) spinbotEnabled = st end)
+    setupToggle(b9, "Auto Kill All", function(st) autoKillAll = st end)
+    setupToggle(b10, "Auto Kill Murder", function(st) autoKillMurder = st end)
+    setupToggle(b12, "Fling Target", function(st) flingTargetEnabled = st end)
+    setupToggle(b13, "Auto Farm Coins", function(st) autoFarmCoins = st end)
+    setupToggle(b14, "Anti-Fling", function(st) antiFling = st end)
+    setupToggle(b15, "Anti-AFK", function(st) antiAfk = st end)
+    setupToggle(b16, "Fullbright", function(st) fullbrightEnabled = st end)
 
-    -- Listy graczy i motywów
+    -- ESP w MM2 (Highlights)
+    local mm2Highlights = {}
+    runService.RenderStepped:Connect(function()
+        if espEnabled then
+            for _, p in pairs(game.Players:GetPlayers()) do
+                if p ~= plr and p.Character then
+                    if not mm2Highlights[p] then
+                        local hl = Instance.new("Highlight")
+                        hl.Name = "MM2ESP"
+                        hl.Adornee = p.Character
+                        hl.FillColor = Color3.fromRGB(0, 255, 255)
+                        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        hl.FillTransparency = 0.5
+                        hl.Parent = p.Character
+                        mm2Highlights[p] = hl
+                    end
+                end
+            end
+        else
+            for _, hl in pairs(mm2Highlights) do
+                if hl then hl:Destroy() end
+            end
+            mm2Highlights = {}
+        end
+    end)
+
+    -- Obsługa listy graczy do Targetu / Flinga
     local playerListFrame = Instance.new("ScrollingFrame")
     playerListFrame.Size = UDim2.new(0.9, 0, 0.75, 0)
     playerListFrame.Position = UDim2.new(0.05, 0, 0.12, 0)
@@ -707,6 +701,32 @@ function startMM2Script()
         end
         if speedHack and plr.Character and plr.Character:FindFirstChild("Humanoid") then
             plr.Character.Humanoid.WalkSpeed = walkSpeedVal
+        end
+        if fullbrightEnabled then
+            lighting.Brightness = 2
+            lighting.ClockTime = 14
+            lighting.GlobalShadows = false
+        end
+    end)
+
+    -- Auto Farm monet (bezpieczne iterowanie)
+    task.spawn(function()
+        while true do
+            task.wait(0.2)
+            if autoFarmCoins and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                pcall(function()
+                    local hrp = plr.Character.HumanoidRootPart
+                    for _, v in pairs(workspace:GetDescendants()) do
+                        if v:IsA("BasePart") and (v.Name == "Coin_Server" or v.Name == "Coin" or v.Name:lower():find("coin")) then
+                            if v.Transparency < 1 then
+                                hrp.CFrame = v.CFrame
+                                task.wait(0.1)
+                                break
+                            end
+                        end
+                    end
+                end)
+            end
         end
     end)
 
