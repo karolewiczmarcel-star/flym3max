@@ -1,32 +1,11 @@
--- MM2 FULL MENU (Fixed Player List UI)
+-- SZPONTHACK MULTIGAME + KEY SYSTEM
 local plr = game.Players.LocalPlayer
 local cam = workspace.CurrentCamera
 local runService = game:GetService("RunService")
 local uis = game:GetService("UserInputService")
 local vu = game:GetService("VirtualUser")
 local tweenService = game:GetService("TweenService")
-
-local flying = false
-local noclip = false
-local espEnabled = false
-local speedHack = false
-local autoGunTP = false
-local triggerbot = false
-local altQuitEnabled = false
-local spinbotEnabled = false
-local autoKillAll = false
-local autoKillMurder = false
-local autoFarmCoins = false
-local antiFling = false
-local antiAfk = false
-
-local targetPlayerName = nil
-local flingTargetEnabled = false
-
-local flySpeed = 60
-local walkSpeedVal = 32
-local spinSpeedVal = 50
-local farmSpeed = 17
+local lighting = game:GetService("Lighting")
 
 ------------------------------------------------------------
 -- UNIVERSAL GUI PARENTING
@@ -49,856 +28,885 @@ end
 local targetParent = getTargetGui()
 
 pcall(function()
-    if targetParent:FindFirstChild("Nigga67") then
-        targetParent.Nigga67:Destroy()
-    end
-    if game.CoreGui:FindFirstChild("Nigga67") then
-        game.CoreGui.Nigga67:Destroy()
-    end
+    if targetParent:FindFirstChild("SzpontHack") then targetParent.SzpontHack:Destroy() end
+    if targetParent:FindFirstChild("SzpontActiveCheats") then targetParent.SzpontActiveCheats:Destroy() end
+    if targetParent:FindFirstChild("SzpontKeySystem") then targetParent.SzpontKeySystem:Destroy() end
+    if targetParent:FindFirstChild("SzpontGameSelector") then targetParent.SzpontGameSelector:Destroy() end
+    if game.CoreGui:FindFirstChild("SzpontHack") then game.CoreGui.SzpontHack:Destroy() end
+    if game.CoreGui:FindFirstChild("SzpontActiveCheats") then game.CoreGui.SzpontActiveCheats:Destroy() end
+    if game.CoreGui:FindFirstChild("SzpontKeySystem") then game.CoreGui.SzpontKeySystem:Destroy() end
+    if game.CoreGui:FindFirstChild("SzpontGameSelector") then game.CoreGui.SzpontGameSelector:Destroy() end
 end)
 
--- GUI
-local g = Instance.new("ScreenGui")
-g.Name = "Nigga67"
-g.ResetOnSpawn = false
-g.Parent = targetParent
+------------------------------------------------------------
+-- KEY SYSTEM (POMARAŃCZOWY)
+------------------------------------------------------------
+local keyGui = Instance.new("ScreenGui")
+keyGui.Name = "SzpontKeySystem"
+keyGui.ResetOnSpawn = false
+keyGui.Parent = targetParent
 
--- Główny kontener
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 240, 0, 560)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -280)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
-mainFrame.BackgroundTransparency = 0.15
-mainFrame.BorderSizePixel = 2
-mainFrame.BorderColor3 = Color3.fromRGB(255, 120, 0)
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Visible = true
-mainFrame.Parent = g
+local keyFrame = Instance.new("Frame")
+keyFrame.Size = UDim2.new(0, 260, 0, 150)
+keyFrame.Position = UDim2.new(0.5, -130, 0.5, -75)
+keyFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
+keyFrame.BackgroundTransparency = 0.15
+keyFrame.BorderSizePixel = 2
+keyFrame.BorderColor3 = Color3.fromRGB(255, 120, 0)
+keyFrame.Active = true
+keyFrame.Draggable = true
+keyFrame.Parent = keyGui
 
--- Ogień w rogach GUI
-local firePositions = {
-    UDim2.new(0, 4, 0, 4),
-    UDim2.new(1, -24, 0, 4),
-    UDim2.new(0, 4, 1, -24),
-    UDim2.new(1, -24, 1, -24)
-}
+local keyTitle = Instance.new("TextLabel")
+keyTitle.Size = UDim2.new(1, 0, 0, 35)
+keyTitle.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+keyTitle.BackgroundTransparency = 0.2
+keyTitle.BorderSizePixel = 0
+keyTitle.Text = "🔥 SzpontKeySystem 🔥"
+keyTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyTitle.TextSize = 15
+keyTitle.Font = Enum.Font.SourceSansBold
+keyTitle.Parent = keyFrame
 
-for _, pos in ipairs(firePositions) do
-    local fireLabel = Instance.new("TextLabel")
-    fireLabel.Size = UDim2.new(0, 20, 0, 20)
-    fireLabel.Position = pos
-    fireLabel.BackgroundTransparency = 1
-    fireLabel.Text = "🔥"
-    fireLabel.TextSize = 16
-    fireLabel.ZIndex = 5
-    fireLabel.Parent = mainFrame
+local keyBox = Instance.new("TextBox")
+keyBox.Size = UDim2.new(0.85, 0, 0, 35)
+keyBox.Position = UDim2.new(0.075, 0, 0.35, 0)
+keyBox.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
+keyBox.BorderColor3 = Color3.fromRGB(255, 120, 0)
+keyBox.BorderSizePixel = 1
+keyBox.PlaceholderText = "Wpisz klucz..."
+keyBox.Text = ""
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.PlaceholderColor3 = Color3.fromRGB(180, 120, 80)
+keyBox.TextSize = 14
+keyBox.Font = Enum.Font.SourceSansBold
+keyBox.Parent = keyFrame
+
+local keyBtn = Instance.new("TextButton")
+keyBtn.Size = UDim2.new(0.85, 0, 0, 30)
+keyBtn.Position = UDim2.new(0.075, 0, 0.68, 0)
+keyBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+keyBtn.BorderSizePixel = 0
+keyBtn.Text = "Zatwierdź"
+keyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBtn.TextSize = 14
+keyBtn.Font = Enum.Font.SourceSansBold
+keyBtn.Parent = keyFrame
+
+------------------------------------------------------------
+-- GUI WYBORU GRY
+------------------------------------------------------------
+local function showGameSelector()
+    keyGui:Destroy()
+
+    local selectorGui = Instance.new("ScreenGui")
+    selectorGui.Name = "SzpontGameSelector"
+    selectorGui.ResetOnSpawn = false
+    selectorGui.Parent = targetParent
+
+    local selectorFrame = Instance.new("Frame")
+    selectorFrame.Size = UDim2.new(0, 260, 0, 180)
+    selectorFrame.Position = UDim2.new(0.5, -130, 0.5, -90)
+    selectorFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
+    selectorFrame.BackgroundTransparency = 0.15
+    selectorFrame.BorderSizePixel = 2
+    selectorFrame.BorderColor3 = Color3.fromRGB(255, 120, 0)
+    selectorFrame.Active = true
+    selectorFrame.Draggable = true
+    selectorFrame.Parent = selectorGui
+
+    local selectorTitle = Instance.new("TextLabel")
+    selectorTitle.Size = UDim2.new(1, 0, 0, 35)
+    selectorTitle.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+    selectorTitle.BackgroundTransparency = 0.2
+    selectorTitle.BorderSizePixel = 0
+    selectorTitle.Text = "🔥 Wybierz Grę 🔥"
+    selectorTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    selectorTitle.TextSize = 15
+    selectorTitle.Font = Enum.Font.SourceSansBold
+    selectorTitle.Parent = selectorFrame
+
+    local btnBloxStrike = Instance.new("TextButton")
+    btnBloxStrike.Size = UDim2.new(0.85, 0, 0, 35)
+    btnBloxStrike.Position = UDim2.new(0.075, 0, 0.32, 0)
+    btnBloxStrike.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
+    btnBloxStrike.BorderColor3 = Color3.fromRGB(255, 120, 0)
+    btnBloxStrike.BorderSizePixel = 1
+    btnBloxStrike.Text = "BloxStrike"
+    btnBloxStrike.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btnBloxStrike.TextSize = 14
+    btnBloxStrike.Font = Enum.Font.SourceSansBold
+    btnBloxStrike.Parent = selectorFrame
+
+    local btnMM2 = Instance.new("TextButton")
+    btnMM2.Size = UDim2.new(0.85, 0, 0, 35)
+    btnMM2.Position = UDim2.new(0.075, 0, 0.62, 0)
+    btnMM2.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
+    btnMM2.BorderColor3 = Color3.fromRGB(255, 120, 0)
+    btnMM2.BorderSizePixel = 1
+    btnMM2.Text = "MM2"
+    btnMM2.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btnMM2.TextSize = 14
+    btnMM2.Font = Enum.Font.SourceSansBold
+    btnMM2.Parent = selectorFrame
+
+    btnBloxStrike.MouseButton1Click:Connect(function()
+        selectorGui:Destroy()
+        startBloxStrikeScript()
+    end)
+
+    btnMM2.MouseButton1Click:Connect(function()
+        selectorGui:Destroy()
+        startMM2Script()
+    end)
 end
 
--- Tytuł Menu
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 35)
-title.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
-title.BackgroundTransparency = 0.2
-title.BorderSizePixel = 0
-title.Text = "Nigga67"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 16
-title.Font = Enum.Font.SourceSansBold
-title.ZIndex = 2
-title.Parent = mainFrame
+------------------------------------------------------------
+-- MENU DLA BLOXSTRIKE (Póki co puste / bazowe)
+------------------------------------------------------------
+function startBloxStrikeScript()
+    local g = Instance.new("ScreenGui")
+    g.Name = "SzpontHack"
+    g.ResetOnSpawn = false
+    g.Parent = targetParent
 
--- Kontener ze SCROLLOWANIEM
-local scrollFrame = Instance.new("ScrollingFrame")
-scrollFrame.Size = UDim2.new(0.9, 0, 0.88, 0)
-scrollFrame.Position = UDim2.new(0.05, 0, 0.10, 0)
-scrollFrame.BackgroundTransparency = 1
-scrollFrame.BorderSizePixel = 0
-scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 910)
-scrollFrame.ScrollBarThickness = 4
-scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
-scrollFrame.ZIndex = 2
-scrollFrame.Parent = mainFrame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 240, 0, 300)
+    mainFrame.Position = UDim2.new(0.5, -120, 0.5, -150)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 5)
+    mainFrame.BackgroundTransparency = 0.15
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BorderColor3 = Color3.fromRGB(255, 120, 0)
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    mainFrame.Parent = g
 
-local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 5)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-layout.Parent = scrollFrame
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 35)
+    title.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+    title.BackgroundTransparency = 0.2
+    title.BorderSizePixel = 0
+    title.Text = "🔥 SzpontHack (BloxStrike) 🔥"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 14
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
 
-local function createButton(text, order)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.95, 0, 0, 26)
-    btn.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
-    btn.BackgroundTransparency = 0.2
-    btn.BorderSizePixel = 1
-    btn.BorderColor3 = Color3.fromRGB(255, 120, 0)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 12
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Text = text
-    btn.LayoutOrder = order
-    btn.ZIndex = 3
-    btn.Parent = scrollFrame
-    return btn
+    local infoLabel = Instance.new("TextLabel")
+    infoLabel.Size = UDim2.new(0.9, 0, 0.6, 0)
+    infoLabel.Position = UDim2.new(0.05, 0, 0.25, 0)
+    infoLabel.BackgroundTransparency = 1
+    infoLabel.Text = "Tutaj wkrótce pojawią się funkcje do BloxStrike!\n(Naciśnij P, aby ukryć/pokazać menu)"
+    infoLabel.TextColor3 = Color3.fromRGB(255, 180, 100)
+    infoLabel.TextSize = 14
+    infoLabel.Font = Enum.Font.SourceSansBold
+    infoLabel.TextWrapped = true
+    infoLabel.Parent = mainFrame
+
+    uis.InputBegan:Connect(function(i, gp)
+        if gp then return end
+        if i.KeyCode == Enum.KeyCode.P then
+            mainFrame.Visible = not mainFrame.Visible
+        end
+    end)
 end
 
--- PRZYCISKI W GUI
-local b1 = createButton("Fly: OFF", 1)
-local b2 = createButton("Noclip: OFF", 2)
-local b3 = createButton("Speed Hack: OFF", 3)
-local b4 = createButton("ESP: OFF", 4)
-local b5 = createButton("Auto TP Gun: OFF", 5)
-
--- Suwak Fly Speed
-local sl1 = Instance.new("TextLabel")
-sl1.Size = UDim2.new(0.95, 0, 0, 12)
-sl1.BackgroundTransparency = 1
-sl1.TextColor3 = Color3.fromRGB(255, 180, 100)
-sl1.TextSize = 11
-sl1.Font = Enum.Font.SourceSansBold
-sl1.Text = "Fly Speed: 60"
-sl1.LayoutOrder = 6
-sl1.ZIndex = 3
-sl1.Parent = scrollFrame
-
-local sb1 = Instance.new("TextButton")
-sb1.Size = UDim2.new(0.95, 0, 0, 10)
-sb1.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
-sb1.BorderSizePixel = 1
-sb1.BorderColor3 = Color3.fromRGB(255, 120, 0)
-sb1.Text = ""
-sb1.AutoButtonColor = false
-sb1.LayoutOrder = 7
-sb1.ZIndex = 3
-sb1.Parent = scrollFrame
-
-local sf1 = Instance.new("Frame")
-sf1.Size = UDim2.new(0.18, 0, 1, 0)
-sf1.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
-sf1.BorderSizePixel = 0
-sf1.ZIndex = 4
-sf1.Parent = sb1
-
--- Suwak Speed Hack
-local sl2 = Instance.new("TextLabel")
-sl2.Size = UDim2.new(0.95, 0, 0, 12)
-sl2.BackgroundTransparency = 1
-sl2.TextColor3 = Color3.fromRGB(255, 180, 100)
-sl2.TextSize = 11
-sl2.Font = Enum.Font.SourceSansBold
-sl2.Text = "Walk Speed: 32"
-sl2.LayoutOrder = 8
-sl2.ZIndex = 3
-sl2.Parent = scrollFrame
-
-local sb2 = Instance.new("TextButton")
-sb2.Size = UDim2.new(0.95, 0, 0, 10)
-sb2.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
-sb2.BorderSizePixel = 1
-sb2.BorderColor3 = Color3.fromRGB(255, 120, 0)
-sb2.Text = ""
-sb2.AutoButtonColor = false
-sb2.LayoutOrder = 9
-sb2.ZIndex = 3
-sb2.Parent = scrollFrame
-
-local sf2 = Instance.new("Frame")
-sf2.Size = UDim2.new(0.15, 0, 1, 0)
-sf2.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
-sf2.BorderSizePixel = 0
-sf2.ZIndex = 4
-sf2.Parent = sb2
-
--- Dodatkowe Przyciski
-local b6 = createButton("Triggerbot: OFF", 10)
-local b7 = createButton("Alt-Quit: OFF", 11)
-local b8 = createButton("Spinbot: OFF", 12)
-
--- Suwak Spin Speed
-local sl3 = Instance.new("TextLabel")
-sl3.Size = UDim2.new(0.95, 0, 0, 12)
-sl3.BackgroundTransparency = 1
-sl3.TextColor3 = Color3.fromRGB(255, 180, 100)
-sl3.TextSize = 11
-sl3.Font = Enum.Font.SourceSansBold
-sl3.Text = "Spin Speed: 50"
-sl3.LayoutOrder = 13
-sl3.ZIndex = 3
-sl3.Parent = scrollFrame
-
-local sb3 = Instance.new("TextButton")
-sb3.Size = UDim2.new(0.95, 0, 0, 10)
-sb3.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
-sb3.BorderSizePixel = 1
-sb3.BorderColor3 = Color3.fromRGB(255, 120, 0)
-sb3.Text = ""
-sb3.AutoButtonColor = false
-sb3.LayoutOrder = 14
-sb3.ZIndex = 3
-sb3.Parent = scrollFrame
-
-local sf3 = Instance.new("Frame")
-sf3.Size = UDim2.new(0.5, 0, 1, 0)
-sf3.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
-sf3.BorderSizePixel = 0
-sf3.ZIndex = 4
-sf3.Parent = sb3
-
-local b9 = createButton("Auto Kill All: OFF", 15)
-local b10 = createButton("Auto Kill Murder: OFF", 16)
-
--- PRZYCISKI DO TARGET FLINGA
-local b11 = createButton("Target: NONE", 17)
-local b12 = createButton("Fling Target: OFF", 18)
-
--- AUTO FARM COINS
-local b13 = createButton("Auto Farm Coins: OFF", 19)
-
--- SUWAK FARM SPEED
-local sl4 = Instance.new("TextLabel")
-sl4.Size = UDim2.new(0.95, 0, 0, 12)
-sl4.BackgroundTransparency = 1
-sl4.TextColor3 = Color3.fromRGB(255, 180, 100)
-sl4.TextSize = 11
-sl4.Font = Enum.Font.SourceSansBold
-sl4.Text = "Farm Speed: 17"
-sl4.LayoutOrder = 20
-sl4.ZIndex = 3
-sl4.Parent = scrollFrame
-
-local sb4 = Instance.new("TextButton")
-sb4.Size = UDim2.new(0.95, 0, 0, 10)
-sb4.BackgroundColor3 = Color3.fromRGB(20, 10, 0)
-sb4.BorderSizePixel = 1
-sb4.BorderColor3 = Color3.fromRGB(255, 120, 0)
-sb4.Text = ""
-sb4.AutoButtonColor = false
-sb4.LayoutOrder = 21
-sb4.ZIndex = 3
-sb4.Parent = scrollFrame
-
-local sf4 = Instance.new("Frame")
-sf4.Size = UDim2.new(0.06, 0, 1, 0)
-sf4.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
-sf4.BorderSizePixel = 0
-sf4.ZIndex = 4
-sf4.Parent = sb4
-
--- ANTI-FLING & ANTI-AFK
-local b14 = createButton("Anti-Fling: OFF", 22)
-local b15 = createButton("Anti-AFK: OFF", 23)
-
 ------------------------------------------------------------
--- FIX DLA LISTY GRACZY (POPOPRAWNY Z-INDEX I CANVAS)
+-- MENU DLA MM2 (Pełne, dotychczasowe funkcje)
 ------------------------------------------------------------
-local playerListFrame = Instance.new("ScrollingFrame")
-playerListFrame.Size = UDim2.new(0.9, 0, 0.75, 0)
-playerListFrame.Position = UDim2.new(0.05, 0, 0.12, 0)
-playerListFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 10)
-playerListFrame.BorderColor3 = Color3.fromRGB(255, 120, 0)
-playerListFrame.BorderSizePixel = 2
-playerListFrame.ZIndex = 100
-playerListFrame.Visible = false
-playerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-playerListFrame.ScrollBarThickness = 6
-playerListFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 0)
-playerListFrame.Parent = mainFrame
+function startMM2Script()
+    local flying = false
+    local noclip = false
+    local espEnabled = false
+    local speedHack = false
+    local autoGunTP = false
+    local triggerbot = false
+    local altQuitEnabled = false
+    local spinbotEnabled = false
+    local autoKillAll = false
+    local autoKillMurder = false
+    local autoFarmCoins = false
+    local antiFling = false
+    local antiAfk = false
+    local fullbrightEnabled = false
 
-local listLayout = Instance.new("UIListLayout")
-listLayout.Padding = UDim.new(0, 3)
-listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-listLayout.Parent = playerListFrame
+    local targetPlayerName = nil
+    local flingTargetEnabled = false
 
-local function refreshPlayerList()
-    for _, child in pairs(playerListFrame:GetChildren()) do
-        if child:IsA("TextButton") then 
-            child:Destroy() 
+    local flySpeed = 60
+    local walkSpeedVal = 32
+    local spinSpeedVal = 50
+    local farmSpeed = 17
+
+    local currentTheme = "Orange"
+    local themes = {
+        Orange = {
+            Primary = Color3.fromRGB(255, 120, 0),
+            Dark = Color3.fromRGB(15, 10, 5),
+            ButtonBg = Color3.fromRGB(25, 15, 5),
+            TextCol = Color3.fromRGB(255, 180, 100)
+        },
+        Red = {
+            Primary = Color3.fromRGB(255, 40, 40),
+            Dark = Color3.fromRGB(15, 5, 5),
+            ButtonBg = Color3.fromRGB(25, 10, 10),
+            TextCol = Color3.fromRGB(255, 150, 150)
+        },
+        Purple = {
+            Primary = Color3.fromRGB(170, 50, 255),
+            Dark = Color3.fromRGB(12, 5, 15),
+            ButtonBg = Color3.fromRGB(20, 10, 25),
+            TextCol = Color3.fromRGB(210, 150, 255)
+        },
+        Yellow = {
+            Primary = Color3.fromRGB(255, 220, 0),
+            Dark = Color3.fromRGB(15, 12, 5),
+            ButtonBg = Color3.fromRGB(25, 20, 5),
+            TextCol = Color3.fromRGB(255, 240, 120)
+        },
+        Blue = {
+            Primary = Color3.fromRGB(0, 150, 255),
+            Dark = Color3.fromRGB(5, 10, 15),
+            ButtonBg = Color3.fromRGB(10, 20, 25),
+            TextCol = Color3.fromRGB(120, 200, 255)
+        }
+    }
+
+    local g = Instance.new("ScreenGui")
+    g.Name = "SzpontHack"
+    g.ResetOnSpawn = false
+    g.Parent = targetParent
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 240, 0, 560)
+    mainFrame.Position = UDim2.new(0.5, -120, 0.5, -280)
+    mainFrame.BackgroundColor3 = themes[currentTheme].Dark
+    mainFrame.BackgroundTransparency = 0.15
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BorderColor3 = themes[currentTheme].Primary
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    mainFrame.Visible = true
+    mainFrame.Parent = g
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 35)
+    title.BackgroundColor3 = themes[currentTheme].Primary
+    title.BackgroundTransparency = 0.2
+    title.BorderSizePixel = 0
+    title.Text = "🔥 SzpontHack (MM2) 🔥"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 14
+    title.Font = Enum.Font.SourceSansBold
+    title.ZIndex = 2
+    title.Parent = mainFrame
+
+    local scrollFrame = Instance.new("ScrollingFrame")
+    scrollFrame.Size = UDim2.new(0.9, 0, 0.88, 0)
+    scrollFrame.Position = UDim2.new(0.05, 0, 0.10, 0)
+    scrollFrame.BackgroundTransparency = 1
+    scrollFrame.BorderSizePixel = 0
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 1080)
+    scrollFrame.ScrollBarThickness = 4
+    scrollFrame.ScrollBarImageColor3 = themes[currentTheme].Primary
+    scrollFrame.ZIndex = 2
+    scrollFrame.Parent = mainFrame
+
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 5)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    layout.Parent = scrollFrame
+
+    local allButtons = {}
+    local allSliders = {}
+    local allFrames = {}
+    local allLabels = {}
+
+    local function createButton(text, order)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0.95, 0, 0, 26)
+        btn.BackgroundColor3 = themes[currentTheme].ButtonBg
+        btn.BackgroundTransparency = 0.2
+        btn.BorderSizePixel = 1
+        btn.BorderColor3 = themes[currentTheme].Primary
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 12
+        btn.Font = Enum.Font.SourceSansBold
+        btn.Text = text
+        btn.LayoutOrder = order
+        btn.ZIndex = 3
+        btn.Parent = scrollFrame
+        table.insert(allButtons, btn)
+        return btn
+    end
+
+    local b1 = createButton("Fly: OFF", 1)
+    local b2 = createButton("Noclip: OFF", 2)
+    local b3 = createButton("Speed Hack: OFF", 3)
+    local b4 = createButton("ESP: OFF", 4)
+    local b5 = createButton("Auto TP Gun: OFF", 5)
+
+    local sl1 = Instance.new("TextLabel")
+    sl1.Size = UDim2.new(0.95, 0, 0, 12)
+    sl1.BackgroundTransparency = 1
+    sl1.TextColor3 = themes[currentTheme].TextCol
+    sl1.TextSize = 11
+    sl1.Font = Enum.Font.SourceSansBold
+    sl1.Text = "Fly Speed: 60"
+    sl1.LayoutOrder = 6
+    sl1.ZIndex = 3
+    sl1.Parent = scrollFrame
+    table.insert(allLabels, sl1)
+
+    local sb1 = Instance.new("TextButton")
+    sb1.Size = UDim2.new(0.95, 0, 0, 10)
+    sb1.BackgroundColor3 = themes[currentTheme].Dark
+    sb1.BorderSizePixel = 1
+    sb1.BorderColor3 = themes[currentTheme].Primary
+    sb1.Text = ""
+    sb1.AutoButtonColor = false
+    sb1.LayoutOrder = 7
+    sb1.ZIndex = 3
+    sb1.Parent = scrollFrame
+    table.insert(allSliders, sb1)
+
+    local sf1 = Instance.new("Frame")
+    sf1.Size = UDim2.new(0.18, 0, 1, 0)
+    sf1.BackgroundColor3 = themes[currentTheme].Primary
+    sf1.BorderSizePixel = 0
+    sf1.ZIndex = 4
+    sf1.Parent = sb1
+    table.insert(allFrames, sf1)
+
+    local sl2 = Instance.new("TextLabel")
+    sl2.Size = UDim2.new(0.95, 0, 0, 12)
+    sl2.BackgroundTransparency = 1
+    sl2.TextColor3 = themes[currentTheme].TextCol
+    sl2.TextSize = 11
+    sl2.Font = Enum.Font.SourceSansBold
+    sl2.Text = "Walk Speed: 32"
+    sl2.LayoutOrder = 8
+    sl2.ZIndex = 3
+    sl2.Parent = scrollFrame
+    table.insert(allLabels, sl2)
+
+    local sb2 = Instance.new("TextButton")
+    sb2.Size = UDim2.new(0.95, 0, 0, 10)
+    sb2.BackgroundColor3 = themes[currentTheme].Dark
+    sb2.BorderSizePixel = 1
+    sb2.BorderColor3 = themes[currentTheme].Primary
+    sb2.Text = ""
+    sb2.AutoButtonColor = false
+    sb2.LayoutOrder = 9
+    sb2.ZIndex = 3
+    sb2.Parent = scrollFrame
+    table.insert(allSliders, sb2)
+
+    local sf2 = Instance.new("Frame")
+    sf2.Size = UDim2.new(0.15, 0, 1, 0)
+    sf2.BackgroundColor3 = themes[currentTheme].Primary
+    sf2.BorderSizePixel = 0
+    sf2.ZIndex = 4
+    sf2.Parent = sb2
+    table.insert(allFrames, sf2)
+
+    local b6 = createButton("Triggerbot: OFF", 10)
+    local b7 = createButton("Alt-Quit: OFF", 11)
+    local b8 = createButton("Spinbot: OFF", 12)
+
+    local sl3 = Instance.new("TextLabel")
+    sl3.Size = UDim2.new(0.95, 0, 0, 12)
+    sl3.BackgroundTransparency = 1
+    sl3.TextColor3 = themes[currentTheme].TextCol
+    sl3.TextSize = 11
+    sl3.Font = Enum.Font.SourceSansBold
+    sl3.Text = "Spin Speed: 50"
+    sl3.LayoutOrder = 13
+    sl3.ZIndex = 3
+    sl3.Parent = scrollFrame
+    table.insert(allLabels, sl3)
+
+    local sb3 = Instance.new("TextButton")
+    sb3.Size = UDim2.new(0.95, 0, 0, 10)
+    sb3.BackgroundColor3 = themes[currentTheme].Dark
+    sb3.BorderSizePixel = 1
+    sb3.BorderColor3 = themes[currentTheme].Primary
+    sb3.Text = ""
+    sb3.AutoButtonColor = false
+    sb3.LayoutOrder = 14
+    sb3.ZIndex = 3
+    sb3.Parent = scrollFrame
+    table.insert(allSliders, sb3)
+
+    local sf3 = Instance.new("Frame")
+    sf3.Size = UDim2.new(0.5, 0, 1, 0)
+    sf3.BackgroundColor3 = themes[currentTheme].Primary
+    sf3.BorderSizePixel = 0
+    sf3.ZIndex = 4
+    sf3.Parent = sb3
+    table.insert(allFrames, sf3)
+
+    local b9 = createButton("Auto Kill All: OFF", 15)
+    local b10 = createButton("Auto Kill Murder: OFF", 16)
+    local b11 = createButton("Target: NONE", 17)
+    local b12 = createButton("Fling Target: OFF", 18)
+    local b13 = createButton("Auto Farm Coins: OFF", 19)
+
+    local sl4 = Instance.new("TextLabel")
+    sl4.Size = UDim2.new(0.95, 0, 0, 12)
+    sl4.BackgroundTransparency = 1
+    sl4.TextColor3 = themes[currentTheme].TextCol
+    sl4.TextSize = 11
+    sl4.Font = Enum.Font.SourceSansBold
+    sl4.Text = "Farm Speed: 17"
+    sl4.LayoutOrder = 20
+    sl4.ZIndex = 3
+    sl4.Parent = scrollFrame
+    table.insert(allLabels, sl4)
+
+    local sb4 = Instance.new("TextButton")
+    sb4.Size = UDim2.new(0.95, 0, 0, 10)
+    sb4.BackgroundColor3 = themes[currentTheme].Dark
+    sb4.BorderSizePixel = 1
+    sb4.BorderColor3 = themes[currentTheme].Primary
+    sb4.Text = ""
+    sb4.AutoButtonColor = false
+    sb4.LayoutOrder = 21
+    sb4.ZIndex = 3
+    sb4.Parent = scrollFrame
+    table.insert(allSliders, sb4)
+
+    local sf4 = Instance.new("Frame")
+    sf4.Size = UDim2.new(0.06, 0, 1, 0)
+    sf4.BackgroundColor3 = themes[currentTheme].Primary
+    sf4.BorderSizePixel = 0
+    sf4.ZIndex = 4
+    sf4.Parent = sb4
+    table.insert(allFrames, sf4)
+
+    local b14 = createButton("Anti-Fling: OFF", 22)
+    local b15 = createButton("Anti-AFK: OFF", 23)
+    local b16 = createButton("Fullbright: OFF", 24)
+    local bThemeToggle = createButton("Theme: Orange", 25)
+
+    local activeCheatsGui = Instance.new("ScreenGui")
+    activeCheatsGui.Name = "SzpontActiveCheats"
+    activeCheatsGui.ResetOnSpawn = false
+    activeCheatsGui.Parent = targetParent
+
+    local cheatsPanel = Instance.new("Frame")
+    cheatsPanel.Size = UDim2.new(0, 200, 1, -330)
+    cheatsPanel.Position = UDim2.new(1, -210, 0, 325)
+    cheatsPanel.BackgroundColor3 = themes[currentTheme].Dark
+    cheatsPanel.BackgroundTransparency = 0.3
+    cheatsPanel.BorderSizePixel = 2
+    cheatsPanel.BorderColor3 = themes[currentTheme].Primary
+    cheatsPanel.Active = false
+    cheatsPanel.Draggable = false
+    cheatsPanel.Parent = activeCheatsGui
+
+    local cheatsTitle = Instance.new("TextLabel")
+    cheatsTitle.Size = UDim2.new(1, 0, 0, 28)
+    cheatsTitle.BackgroundColor3 = themes[currentTheme].Primary
+    cheatsTitle.BackgroundTransparency = 0.2
+    cheatsTitle.BorderSizePixel = 0
+    cheatsTitle.Text = "🔥 SzpontLista 🔥"
+    cheatsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    cheatsTitle.TextSize = 13
+    cheatsTitle.Font = Enum.Font.SourceSansBold
+    cheatsTitle.Parent = cheatsPanel
+
+    local cheatsScroll = Instance.new("ScrollingFrame")
+    cheatsScroll.Size = UDim2.new(0.95, 0, 0.92, 0)
+    cheatsScroll.Position = UDim2.new(0.025, 0, 0.07, 0)
+    cheatsScroll.BackgroundTransparency = 1
+    cheatsScroll.BorderSizePixel = 0
+    cheatsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    cheatsScroll.ScrollBarThickness = 3
+    cheatsScroll.ScrollBarImageColor3 = themes[currentTheme].Primary
+    cheatsScroll.Parent = cheatsPanel
+
+    local cheatsListLayout = Instance.new("UIListLayout")
+    cheatsListLayout.Padding = UDim.new(0, 3)
+    cheatsListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    cheatsListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    cheatsListLayout.Parent = cheatsScroll
+
+    local function updateActiveCheatsList()
+        for _, child in pairs(cheatsScroll:GetChildren()) do
+            if child:IsA("TextLabel") then child:Destroy() end
         end
-    end
-    
-    local count = 0
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= plr then
-            count = count + 1
-            local pBtn = Instance.new("TextButton")
-            pBtn.Size = UDim2.new(0.9, 0, 0, 28)
-            pBtn.BackgroundColor3 = Color3.fromRGB(35, 20, 10)
-            pBtn.BorderColor3 = Color3.fromRGB(255, 100, 0)
-            pBtn.BorderSizePixel = 1
-            pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            pBtn.Font = Enum.Font.SourceSansBold
-            pBtn.TextSize = 13
-            pBtn.Text = p.Name
-            pBtn.ZIndex = 101
-            pBtn.Parent = playerListFrame
 
-            pBtn.MouseButton1Click:Connect(function()
-                targetPlayerName = p.Name
-                b11.Text = "Target: " .. p.Name
-                playerListFrame.Visible = false
-            end)
+        local activeList = {}
+        if flying then table.insert(activeList, "• Fly (" .. flySpeed .. ")") end
+        if noclip then table.insert(activeList, "• Noclip") end
+        if speedHack then table.insert(activeList, "• Speed Hack (" .. walkSpeedVal .. ")") end
+        if espEnabled then table.insert(activeList, "• ESP") end
+        if autoGunTP then table.insert(activeList, "• Auto TP Gun") end
+        if triggerbot then table.insert(activeList, "• Triggerbot") end
+        if altQuitEnabled then table.insert(activeList, "• Alt-Quit") end
+        if spinbotEnabled then table.insert(activeList, "• Spinbot (" .. spinSpeedVal .. ")") end
+        if autoKillAll then table.insert(activeList, "• Auto Kill All") end
+        if autoKillMurder then table.insert(activeList, "• Auto Kill Murder") end
+        if flingTargetEnabled then table.insert(activeList, "• Fling: " .. (targetPlayerName or "Brak")) end
+        if autoFarmCoins then table.insert(activeList, "• Auto Farm") end
+        if antiFling then table.insert(activeList, "• Anti-Fling") end
+        if antiAfk then table.insert(activeList, "• Anti-AFK") end
+        if fullbrightEnabled then table.insert(activeList, "• Fullbright") end
+
+        for i, cheatName in ipairs(activeList) do
+            local lbl = Instance.new("TextLabel")
+            lbl.Size = UDim2.new(0.95, 0, 0, 22)
+            lbl.BackgroundColor3 = themes[currentTheme].ButtonBg
+            lbl.BackgroundTransparency = 0.4
+            lbl.BorderSizePixel = 0
+            lbl.TextColor3 = themes[currentTheme].TextCol
+            lbl.TextSize = 12
+            lbl.Font = Enum.Font.SourceSansBold
+            lbl.Text = cheatName
+            lbl.LayoutOrder = i
+            lbl.Parent = cheatsScroll
         end
+
+        cheatsScroll.CanvasSize = UDim2.new(0, 0, 0, #activeList * 25)
     end
-    playerListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 31)
-end
 
-b11.MouseButton1Click:Connect(function()
-    playerListFrame.Visible = not playerListFrame.Visible
-    if playerListFrame.Visible then refreshPlayerList() end
-end)
+    local playerListFrame = Instance.new("ScrollingFrame")
+    playerListFrame.Size = UDim2.new(0.9, 0, 0.75, 0)
+    playerListFrame.Position = UDim2.new(0.05, 0, 0.12, 0)
+    playerListFrame.BackgroundColor3 = themes[currentTheme].Dark
+    playerListFrame.BorderColor3 = themes[currentTheme].Primary
+    playerListFrame.BorderSizePixel = 2
+    playerListFrame.ZIndex = 25
+    playerListFrame.Visible = false
+    playerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    playerListFrame.ScrollBarThickness = 6
+    playerListFrame.ScrollBarImageColor3 = themes[currentTheme].Primary
+    playerListFrame.Parent = mainFrame
 
--- OBSŁUGA SUWAKÓW
-local dragging1, dragging2, dragging3, dragging4 = false, false, false, false
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Padding = UDim.new(0, 4)
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    listLayout.Parent = playerListFrame
 
-sb1.MouseButton1Down:Connect(function() dragging1 = true end)
-sb2.MouseButton1Down:Connect(function() dragging2 = true end)
-sb3.MouseButton1Down:Connect(function() dragging3 = true end)
-sb4.MouseButton1Down:Connect(function() dragging4 = true end)
-
-uis.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging1, dragging2, dragging3, dragging4 = false, false, false, false
-    end
-end)
-
-uis.InputChanged:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseMovement then
-        if dragging1 then
-            local rel = math.clamp((i.Position.X - sb1.AbsolutePosition.X) / sb1.AbsoluteSize.X, 0, 1)
-            sf1.Size = UDim2.new(rel, 0, 1, 0)
-            flySpeed = math.floor(10 + rel * 290)
-            sl1.Text = "Fly Speed: " .. flySpeed
-        elseif dragging2 then
-            local rel = math.clamp((i.Position.X - sb2.AbsolutePosition.X) / sb2.AbsoluteSize.X, 0, 1)
-            sf2.Size = UDim2.new(rel, 0, 1, 0)
-            walkSpeedVal = math.floor(16 + rel * 134)
-            sl2.Text = "Walk Speed: " .. walkSpeedVal
-        elseif dragging3 then
-            local rel = math.clamp((i.Position.X - sb3.AbsolutePosition.X) / sb3.AbsoluteSize.X, 0, 1)
-            sf3.Size = UDim2.new(rel, 0, 1, 0)
-            spinSpeedVal = math.floor(10 + rel * 190)
-            sl3.Text = "Spin Speed: " .. spinSpeedVal
-        elseif dragging4 then
-            local rel = math.clamp((i.Position.X - sb4.AbsolutePosition.X) / sb4.AbsoluteSize.X, 0, 1)
-            sf4.Size = UDim2.new(rel, 0, 1, 0)
-            farmSpeed = math.floor(5 + rel * 95)
-            sl4.Text = "Farm Speed: " .. farmSpeed
+    local function refreshPlayerList()
+        for _, child in pairs(playerListFrame:GetChildren()) do
+            if child:IsA("TextButton") then child:Destroy() end
         end
-    end
-end)
+        
+        local count = 0
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= plr then
+                count = count + 1
+                local pBtn = Instance.new("TextButton")
+                pBtn.Size = UDim2.new(0.95, 0, 0, 28)
+                pBtn.BackgroundColor3 = themes[currentTheme].ButtonBg
+                pBtn.BorderColor3 = themes[currentTheme].Primary
+                pBtn.BorderSizePixel = 1
+                pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                pBtn.Font = Enum.Font.SourceSansBold
+                pBtn.TextSize = 14
+                pBtn.Text = p.Name
+                pBtn.ZIndex = 26
+                pBtn.Parent = playerListFrame
 
--- SKRÓTY KLAWISZOWE
-uis.InputBegan:Connect(function(i, gp)
-    if gp then return end
-    if i.KeyCode == Enum.KeyCode.P then
-        mainFrame.Visible = not mainFrame.Visible
-    elseif i.KeyCode == Enum.KeyCode.LeftAlt or i.KeyCode == Enum.KeyCode.RightAlt then
-        if altQuitEnabled then
-            pcall(function() game:Shutdown() end)
+                pBtn.MouseButton1Click:Connect(function()
+                    targetPlayerName = p.Name
+                    b11.Text = "Target: " .. p.Name
+                    playerListFrame.Visible = false
+                    updateActiveCheatsList()
+                end)
+            end
         end
+        playerListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 32)
     end
-end)
 
-------------------------------------------------------------
--- ANTI-AFK
-------------------------------------------------------------
-b15.MouseButton1Click:Connect(function()
-    antiAfk = not antiAfk
-    b15.Text = antiAfk and "Anti-AFK: ON" or "Anti-AFK: OFF"
-    b15.BackgroundColor3 = antiAfk and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
+    local themeListFrame = Instance.new("ScrollingFrame")
+    themeListFrame.Size = UDim2.new(0.9, 0, 0.5, 0)
+    themeListFrame.Position = UDim2.new(0.05, 0, 0.25, 0)
+    themeListFrame.BackgroundColor3 = themes[currentTheme].Dark
+    themeListFrame.BorderColor3 = themes[currentTheme].Primary
+    themeListFrame.BorderSizePixel = 2
+    themeListFrame.ZIndex = 25
+    themeListFrame.Visible = false
+    themeListFrame.CanvasSize = UDim2.new(0, 0, 0, 220)
+    themeListFrame.ScrollBarThickness = 6
+    themeListFrame.ScrollBarImageColor3 = themes[currentTheme].Primary
+    themeListFrame.Parent = mainFrame
 
-plr.Idled:Connect(function()
-    if antiAfk then
-        pcall(function()
-            vu:CaptureController()
-            vu:ClickButton2(Vector2.new())
+    local themeListLayout = Instance.new("UIListLayout")
+    themeListLayout.Padding = UDim.new(0, 6)
+    themeListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    themeListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    themeListLayout.Parent = themeListFrame
+
+    local function updateTheme(themeName)
+        if not themes[themeName] then return end
+        currentTheme = themeName
+        bThemeToggle.Text = "Theme: " .. themeName
+        
+        local t = themes[themeName]
+        mainFrame.BackgroundColor3 = t.Dark
+        mainFrame.BorderColor3 = t.Primary
+        title.BackgroundColor3 = t.Primary
+        scrollFrame.ScrollBarImageColor3 = t.Primary
+        
+        cheatsPanel.BackgroundColor3 = t.Dark
+        cheatsPanel.BorderColor3 = t.Primary
+        cheatsTitle.BackgroundColor3 = t.Primary
+        cheatsScroll.ScrollBarImageColor3 = t.Primary
+        
+        for _, btn in ipairs(allButtons) do
+            btn.BorderColor3 = t.Primary
+            if btn.BackgroundColor3 ~= t.Primary and btn ~= bThemeToggle then
+                btn.BackgroundColor3 = t.ButtonBg
+            end
+        end
+        
+        for _, sl in ipairs(allSliders) do
+            sl.BackgroundColor3 = t.Dark
+            sl.BorderColor3 = t.Primary
+        end
+        
+        for _, frm in ipairs(allFrames) do
+            frm.BackgroundColor3 = t.Primary
+        end
+        
+        for _, lbl in ipairs(allLabels) do
+            lbl.TextColor3 = t.TextCol
+        end
+        
+        playerListFrame.BackgroundColor3 = t.Dark
+        playerListFrame.BorderColor3 = t.Primary
+        playerListFrame.ScrollBarImageColor3 = t.Primary
+        
+        themeListFrame.BackgroundColor3 = t.Dark
+        themeListFrame.BorderColor3 = t.Primary
+        themeListFrame.ScrollBarImageColor3 = t.Primary
+        
+        updateActiveCheatsList()
+    end
+
+    local themeNames = {"Orange", "Red", "Purple", "Yellow", "Blue"}
+    for i, tName in ipairs(themeNames) do
+        local tBtn = Instance.new("TextButton")
+        tBtn.Size = UDim2.new(0.95, 0, 0, 32)
+        tBtn.BackgroundColor3 = themes[tName].Primary
+        tBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+        tBtn.BorderSizePixel = 1
+        tBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        tBtn.Font = Enum.Font.SourceSansBold
+        tBtn.TextSize = 14
+        tBtn.Text = "Motyw: " .. tName
+        tBtn.ZIndex = 26
+        tBtn.LayoutOrder = i
+        tBtn.Parent = themeListFrame
+
+        tBtn.MouseButton1Click:Connect(function()
+            updateTheme(tName)
+            themeListFrame.Visible = false
         end)
     end
-end)
 
-------------------------------------------------------------
--- ANTI-FLING
-------------------------------------------------------------
-b14.MouseButton1Click:Connect(function()
-    antiFling = not antiFling
-    b14.Text = antiFling and "Anti-Fling: ON" or "Anti-Fling: OFF"
-    b14.BackgroundColor3 = antiFling and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
+    bThemeToggle.MouseButton1Click:Connect(function()
+        playerListFrame.Visible = false
+        themeListFrame.Visible = not themeListFrame.Visible
+    end)
 
-runService.Stepped:Connect(function()
-    if antiFling and plr.Character then
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= plr and player.Character then
-                for _, part in pairs(player.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-            end
-        end
+    b11.MouseButton1Click:Connect(function()
+        themeListFrame.Visible = false
+        playerListFrame.Visible = not playerListFrame.Visible
+        if playerListFrame.Visible then refreshPlayerList() end
+    end)
 
-        if not flying and not flingTargetEnabled then
-            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                if hrp.Velocity.Magnitude > 100 then hrp.Velocity = Vector3.new(0, 0, 0) end
-                if hrp.RotVelocity.Magnitude > 100 then hrp.RotVelocity = Vector3.new(0, 0, 0) end
-            end
-        end
-    end
-end)
+    b12.MouseButton1Click:Connect(function()
+        flingTargetEnabled = not flingTargetEnabled
+        b12.Text = flingTargetEnabled and "Fling Target: ON" or "Fling Target: OFF"
+        b12.BackgroundColor3 = flingTargetEnabled and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+        updateActiveCheatsList()
+    end)
 
-------------------------------------------------------------
--- LOGIKA RÓL I WERYFIKACJI
-------------------------------------------------------------
-local function getRole(player)
-    if not player or not player.Character then return "Innocent" end
-    local function checkContainer(c)
-        if not c then return nil end
-        for _, item in pairs(c:GetChildren()) do
-            if item:IsA("Tool") then
-                local n = item.Name:lower()
-                if n:find("knife") or n:find("blade") or n:find("nóż") then return "Murderer"
-                elseif n:find("gun") or n:find("revolver") or n:find("pistol") then return "Sheriff" end
-            end
-        end
-        return nil
-    end
-    return checkContainer(player:FindFirstChild("Backpack")) or checkContainer(player.Character) or "Innocent"
-end
-
-local function isTargetValid(target)
-    if not target or target == plr then return false end
-    local char = target.Character
-    if not char then return false end
-
-    local hum = char:FindFirstChild("Humanoid")
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-
-    if not hum or not hrp or hum.Health <= 0 then return false end
-    if char:FindFirstChildOfClass("ForceField") then return false end
-
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("SpawnLocation") or (obj.Name:lower():find("lobby") and obj:IsA("BasePart")) then
-            if (hrp.Position - obj.Position).Magnitude < 100 then
-                return false
-            end
-        end
-    end
-    return true
-end
-
-------------------------------------------------------------
--- AUTO FARM COINS
-------------------------------------------------------------
-local currentTween = nil
-
-b13.MouseButton1Click:Connect(function()
-    autoFarmCoins = not autoFarmCoins
-    b13.Text = autoFarmCoins and "Auto Farm Coins: ON" or "Auto Farm Coins: OFF"
-    b13.BackgroundColor3 = autoFarmCoins and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-    
-    if not autoFarmCoins then
-        if currentTween then
-            currentTween:Cancel()
-            currentTween = nil
-        end
-        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character.Humanoid.PlatformStand = false
-        end
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(0.05)
-        if autoFarmCoins and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = plr.Character.HumanoidRootPart
-            local hum = plr.Character:FindFirstChild("Humanoid")
-            
-            local nearestCoin = nil
-            local shortestDistance = math.huge
-            
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") and (v.Name == "Coin_Server" or v.Name == "Coin" or v.Name:lower():find("coin")) then
-                    if v.Transparency < 1 and v.Parent then
-                        local dist = (hrp.Position - v.Position).Magnitude
-                        if dist < shortestDistance then
-                            shortestDistance = dist
-                            nearestCoin = v
-                        end
-                    end
-                end
-            end
-            
-            if nearestCoin and autoFarmCoins then
-                if hum then hum.PlatformStand = true end
-                
-                for _, part in pairs(plr.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then part.CanCollide = false end
-                end
-                
-                hrp.Velocity = Vector3.new(0, 0, 0)
-                hrp.RotVelocity = Vector3.new(0, 0, 0)
-                
-                local distToCoin = (nearestCoin.Position - hrp.Position).Magnitude
-                local travelTime = distToCoin / math.clamp(farmSpeed, 5, 25)
-
-                local tweenInfo = TweenInfo.new(travelTime, Enum.EasingStyle.Linear)
-                currentTween = tweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(nearestCoin.Position)})
-                currentTween:Play()
-                
-                local completed = false
-                local conn
-                conn = currentTween.Completed:Connect(function()
-                    completed = true
-                    conn:Disconnect()
-                end)
-                
-                while not completed and autoFarmCoins and nearestCoin.Parent and nearestCoin.Transparency < 1 do
-                    task.wait(0.05)
-                end
-                
-                if currentTween then currentTween:Cancel() end
-                task.wait(0.02)
-            else
-                if hum then hum.PlatformStand = false end
-            end
-        end
-    end
-end)
-
-------------------------------------------------------------
--- AUTO KILL MURDER
-------------------------------------------------------------
-b10.MouseButton1Click:Connect(function()
-    autoKillMurder = not autoKillMurder
-    b10.Text = autoKillMurder and "Auto Kill Murder: ON" or "Auto Kill Murder: OFF"
-    b10.BackgroundColor3 = autoKillMurder and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(0.1)
-        if autoKillMurder and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local gun = plr.Character:FindFirstChildOfClass("Tool")
-            if not (gun and (gun.Name:lower():find("gun") or gun.Name:lower():find("revolver") or gun.Name:lower():find("pistol"))) then
-                local bpGun = plr.Backpack:FindFirstChildOfClass("Tool")
-                if bpGun and (bpGun.Name:lower():find("gun") or bpGun.Name:lower():find("revolver") or bpGun.Name:lower():find("pistol")) then
-                    plr.Character.Humanoid:EquipTool(bpGun)
-                    gun = bpGun
-                end
-            end
-
-            if gun then
-                for _, target in pairs(game.Players:GetPlayers()) do
-                    if not autoKillMurder then break end
-                    if isTargetValid(target) and getRole(target) == "Murderer" then
-                        local targetHrp = target.Character.HumanoidRootPart
-                        local myHrp = plr.Character.HumanoidRootPart
-                        myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, -3) * CFrame.Angles(0, math.rad(180), 0)
-                        gun:Activate()
-                        task.wait(0.2)
-                    end
-                end
-            end
-        end
-    end
-end)
-
-------------------------------------------------------------
--- AUTO KILL ALL
-------------------------------------------------------------
-b9.MouseButton1Click:Connect(function()
-    autoKillAll = not autoKillAll
-    b9.Text = autoKillAll and "Auto Kill All: ON" or "Auto Kill All: OFF"
-    b9.BackgroundColor3 = autoKillAll and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(0.1)
-        if autoKillAll and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            if getRole(plr) == "Murderer" then
-                local knife = plr.Character:FindFirstChildOfClass("Tool")
-                if not (knife and (knife.Name:lower():find("knife") or knife.Name:lower():find("blade") or knife.Name:lower():find("nóż"))) then
-                    local bpKnife = plr.Backpack:FindFirstChildOfClass("Tool")
-                    if bpKnife and (bpKnife.Name:lower():find("knife") or bpKnife.Name:lower():find("blade") or bpKnife.Name:lower():find("nóż")) then
-                        plr.Character.Humanoid:EquipTool(bpKnife)
-                        knife = bpKnife
-                    end
-                end
-
-                if knife then
-                    for _, target in pairs(game.Players:GetPlayers()) do
-                        if not autoKillAll then break end
-                        if isTargetValid(target) then
-                            local targetHrp = target.Character.HumanoidRootPart
-                            local myHrp = plr.Character.HumanoidRootPart
-                            myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 1)
-                            knife:Activate()
-                            task.wait(0.2)
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
-------------------------------------------------------------
--- SPINBOT
-------------------------------------------------------------
-b8.MouseButton1Click:Connect(function()
-    spinbotEnabled = not spinbotEnabled
-    b8.Text = spinbotEnabled and "Spinbot: ON" or "Spinbot: OFF"
-    b8.BackgroundColor3 = spinbotEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-    if not spinbotEnabled and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-        plr.Character.Humanoid.AutoRotate = true
-    end
-end)
-
-runService.RenderStepped:Connect(function()
-    if spinbotEnabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = plr.Character.HumanoidRootPart
-        local hum = plr.Character:FindFirstChild("Humanoid")
-        if hum then hum.AutoRotate = false end
-        hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeedVal), 0)
-    end
-end)
-
-------------------------------------------------------------
--- ALT-QUIT
-------------------------------------------------------------
-b7.MouseButton1Click:Connect(function()
-    altQuitEnabled = not altQuitEnabled
-    b7.Text = altQuitEnabled and "Alt-Quit: ON" or "Alt-Quit: OFF"
-    b7.BackgroundColor3 = altQuitEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
-
-------------------------------------------------------------
--- TRIGGERBOT
-------------------------------------------------------------
-b6.MouseButton1Click:Connect(function()
-    triggerbot = not triggerbot
-    b6.Text = triggerbot and "Triggerbot: ON" or "Triggerbot: OFF"
-    b6.BackgroundColor3 = triggerbot and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
-
-runService.RenderStepped:Connect(function()
-    if triggerbot and plr.Character then
-        if getRole(plr) ~= "Murderer" then
-            local tool = plr.Character:FindFirstChildOfClass("Tool")
-            if tool and (tool.Name:lower():find("gun") or tool.Name:lower():find("revolver") or tool.Name:lower():find("pistol")) then
-                local ray = cam:ViewportPointToRay(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-                local raycastParams = RaycastParams.new()
-                raycastParams.FilterDescendantsInstances = {plr.Character}
-                raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-
-                local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
-                if result and result.Instance then
-                    local hitChar = result.Instance:FindFirstAncestorOfClass("Model")
-                    if hitChar then
-                        local targetPlayer = game.Players:GetPlayerFromCharacter(hitChar)
-                        if targetPlayer and targetPlayer ~= plr and getRole(targetPlayer) == "Murderer" then
-                            tool:Activate()
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
-------------------------------------------------------------
--- AUTO TP TO GUN
-------------------------------------------------------------
-local originalPos = nil
-local isTeleporting = false
-
-b5.MouseButton1Click:Connect(function()
-    autoGunTP = not autoGunTP
-    b5.Text = autoGunTP and "Auto TP Gun: ON" or "Auto TP Gun: OFF"
-    b5.BackgroundColor3 = autoGunTP and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-    if not autoGunTP then
-        isTeleporting = false
-        originalPos = nil
-    end
-end)
-
-runService.RenderStepped:Connect(function()
-    if autoGunTP and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = plr.Character.HumanoidRootPart
-        local gunDrop = workspace:FindFirstChild("GunDrop", true)
-
-        if gunDrop then
-            if not isTeleporting then
-                originalPos = hrp.CFrame
-                isTeleporting = true
-            end
-            hrp.CFrame = gunDrop.CFrame + Vector3.new(0, 1, 0)
-        else
-            if isTeleporting then
-                if originalPos then hrp.CFrame = originalPos end
-                isTeleporting = false
-                originalPos = nil
-            end
-        end
-    end
-end)
-
-------------------------------------------------------------
--- FLY
-------------------------------------------------------------
-b1.MouseButton1Click:Connect(function()
-    flying = not flying
-    b1.Text = flying and "Fly: ON" or "Fly: OFF"
-    b1.BackgroundColor3 = flying and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-    if not flying and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-        plr.Character.Humanoid.PlatformStand = false
-        plr.Character.Humanoid.AutoRotate = true
-    end
-end)
-
-runService.RenderStepped:Connect(function(dt)
-    if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = plr.Character.HumanoidRootPart
-        local hum = plr.Character:FindFirstChild("Humanoid")
-        if hum then 
-            hum.PlatformStand = true 
-            hum.AutoRotate = false
-        end
-
-        local moveDir = Vector3.new(0, 0, 0)
-        if uis:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
-        if uis:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
-        if uis:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
-        if uis:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
-        if uis:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
-        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
-
-        local nextPos = hrp.Position
-        if moveDir.Magnitude > 0 then
-            nextPos = hrp.Position + (moveDir.Unit * flySpeed * dt)
-        end
-
-        local lookAt = nextPos + cam.CFrame.LookVector
-        hrp.CFrame = CFrame.new(nextPos, lookAt)
-        hrp.Velocity = Vector3.new(0, 0, 0)
-    end
-end)
-
-------------------------------------------------------------
--- NOCLIP
-------------------------------------------------------------
-b2.MouseButton1Click:Connect(function()
-    noclip = not noclip
-    b2.Text = noclip and "Noclip: ON" or "Noclip: OFF"
-    b2.BackgroundColor3 = noclip and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
-
-runService.Stepped:Connect(function()
-    if noclip and plr.Character then
-        for _, part in pairs(plr.Character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
-        end
-    end
-end)
-
-------------------------------------------------------------
--- SPEED HACK
-------------------------------------------------------------
-b3.MouseButton1Click:Connect(function()
-    speedHack = not speedHack
-    b3.Text = speedHack and "Speed Hack: ON" or "Speed Hack: OFF"
-    b3.BackgroundColor3 = speedHack and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
-
-runService.RenderStepped:Connect(function()
-    if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-        plr.Character.Humanoid.WalkSpeed = speedHack and walkSpeedVal or 16
-    end
-end)
-
-------------------------------------------------------------
--- ESP MM2
-------------------------------------------------------------
-local function getRoleColor(role)
-    if role == "Murderer" then return Color3.fromRGB(255, 0, 0)
-    elseif role == "Sheriff" then return Color3.fromRGB(0, 150, 255)
-    else return Color3.fromRGB(0, 255, 0) end
-end
-
-b4.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    b4.Text = espEnabled and "ESP: ON" or "ESP: OFF"
-    b4.BackgroundColor3 = espEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
-
-runService.RenderStepped:Connect(function()
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= plr and player.Character then
-            local char = player.Character
-            local head = char:FindFirstChild("Head")
-            if espEnabled and head then
-                local role = getRole(player)
-                local color = getRoleColor(role)
-                
-                local highlight = char:FindFirstChild("ESPHighlight") or Instance.new("Highlight", char)
-                highlight.Name = "ESPHighlight"
-                highlight.Adornee = char
-                highlight.FillColor = color
-                highlight.FillTransparency = 0.5
-                highlight.OutlineColor = color
-                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-
-                local bb = head:FindFirstChild("ESPLabel") or Instance.new("BillboardGui", head)
-                if bb.Name ~= "ESPLabel" then
-                    bb.Name = "ESPLabel"
-                    bb.Size = UDim2.new(0, 100, 0, 30)
-                    bb.StudsOffset = Vector3.new(0, 2.5, 0)
-                    bb.AlwaysOnTop = true
-                    local label = Instance.new("TextLabel", bb)
-                    label.Name = "Txt"
-                    label.Size = UDim2.new(1, 0, 1, 0)
-                    label.BackgroundTransparency = 1
-                    label.TextSize = 14
-                    label.Font = Enum.Font.SourceSansBold
-                end
-                bb.Txt.Text = player.Name .. " [" .. role .. "]"
-                bb.Txt.TextColor3 = color
-            else
-                if char:FindFirstChild("ESPHighlight") then char.ESPHighlight:Destroy() end
-                if head and head:FindFirstChild("ESPLabel") then head.ESPLabel:Destroy() end
-            end
-        end
-    end
-end)
-
-------------------------------------------------------------
--- FLING TARGET LOOP
-------------------------------------------------------------
-b12.MouseButton1Click:Connect(function()
-    flingTargetEnabled = not flingTargetEnabled
-    b12.Text = flingTargetEnabled and "Fling Target: ON" or "Fling Target: OFF"
-    b12.BackgroundColor3 = flingTargetEnabled and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(25, 15, 5)
-end)
-
-task.spawn(function()
-    while true do
-        task.wait()
+    runService.Heartbeat:Connect(function()
         if flingTargetEnabled and targetPlayerName then
-            local target = game.Players:FindFirstChild(targetPlayerName)
-            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local myHrp = plr.Character.HumanoidRootPart
-                local targetHrp = target.Character.HumanoidRootPart
-                
-                myHrp.CFrame = targetHrp.CFrame
-                myHrp.Velocity = Vector3.new(99999, 99999, 99999)
-                myHrp.RotVelocity = Vector3.new(99999, 99999, 99999)
+            local targetPlayer = game.Players:FindFirstChild(targetPlayerName)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    local myHrp = plr.Character.HumanoidRootPart
+                    local targetHrp = targetPlayer.Character.HumanoidRootPart
+                    myHrp.CFrame = targetHrp.CFrame
+                    myHrp.Velocity = Vector3.new(30000, 30000, 30000)
+                    myHrp.RotVelocity = Vector3.new(20000, 20000, 20000)
+                end
             end
         end
-    end
+    end)
+
+    local dragging1, dragging2, dragging3, dragging4 = false, false, false, false
+
+    sb1.MouseButton1Down:Connect(function() dragging1 = true end)
+    sb2.MouseButton1Down:Connect(function() dragging2 = true end)
+    sb3.MouseButton1Down:Connect(function() dragging3 = true end)
+    sb4.MouseButton1Down:Connect(function() dragging4 = true end)
+
+    uis.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging1, dragging2, dragging3, dragging4 = false, false, false, false
+        end
+    end)
+
+    uis.InputChanged:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseMovement then
+            if dragging1 then
+                local rel = math.clamp((i.Position.X - sb1.AbsolutePosition.X) / sb1.AbsoluteSize.X, 0, 1)
+                sf1.Size = UDim2.new(rel, 0, 1, 0)
+                flySpeed = math.floor(10 + rel * 290)
+                sl1.Text = "Fly Speed: " .. flySpeed
+                updateActiveCheatsList()
+            elseif dragging2 then
+                local rel = math.clamp((i.Position.X - sb2.AbsolutePosition.X) / sb2.AbsoluteSize.X, 0, 1)
+                sf2.Size = UDim2.new(rel, 0, 1, 0)
+                walkSpeedVal = math.floor(16 + rel * 134)
+                sl2.Text = "Walk Speed: " .. walkSpeedVal
+                updateActiveCheatsList()
+            elseif dragging3 then
+                local rel = math.clamp((i.Position.X - sb3.AbsolutePosition.X) / sb3.AbsoluteSize.X, 0, 1)
+                sf3.Size = UDim2.new(rel, 0, 1, 0)
+                spinSpeedVal = math.floor(10 + rel * 190)
+                sl3.Text = "Spin Speed: " .. spinSpeedVal
+                updateActiveCheatsList()
+            elseif dragging4 then
+                local rel = math.clamp((i.Position.X - sb4.AbsolutePosition.X) / sb4.AbsoluteSize.X, 0, 1)
+                sf4.Size = UDim2.new(rel, 0, 1, 0)
+                farmSpeed = math.floor(5 + rel * 95)
+                sl4.Text = "Farm Speed: " .. farmSpeed
+            end
+        end
+    end)
+
+    uis.InputBegan:Connect(function(i, gp)
+        if gp then return end
+        if i.KeyCode == Enum.KeyCode.P then
+            mainFrame.Visible = not mainFrame.Visible
+            cheatsPanel.Visible = mainFrame.Visible
+        elseif i.KeyCode == Enum.KeyCode.LeftAlt or i.KeyCode == Enum.KeyCode.RightAlt then
+            if altQuitEnabled then pcall(function() game:Shutdown() end) end
+        end
+    end)
+
+    b16.MouseButton1Click:Connect(function()
+        fullbrightEnabled = not fullbrightEnabled
+        b16.Text = fullbrightEnabled and "Fullbright: ON" or "Fullbright: OFF"
+        b16.BackgroundColor3 = fullbrightEnabled and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+        updateActiveCheatsList()
+    end)
+
+    runService.RenderStepped:Connect(function()
+        if fullbrightEnabled then
+            lighting.Brightness = 2
+            lighting.ClockTime = 14
+            lighting.GlobalShadows = false
+            lighting.FogEnd = 999999
+        else
+            lighting.GlobalShadows = true
+        end
+    end)
+
+    b15.MouseButton1Click:Connect(function()
+        antiAfk = not antiAfk
+        b15.Text = antiAfk and "Anti-AFK: ON" or "Anti-AFK: OFF"
+        b15.BackgroundColor3 = antiAfk and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+        updateActiveCheatsList()
+    end)
+
+    plr.Idled:Connect(function()
+        if antiAfk then
+            pcall(function()
+                vu:CaptureController()
+                vu:ClickButton2(Vector2.new())
+            end)
+        end
+    end)
+
+    b14.MouseButton1Click:Connect(function()
+        antiFling = not antiFling
+        b14.Text = antiFling and "Anti-Fling: ON" or "Anti-Fling: OFF"
+        b14.BackgroundColor3 = antiFling and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+        updateActiveCheatsList()
+    end)
+
+    runService.Stepped:Connect(function()
+        if antiFling and plr.Character then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= plr and player.Character then
+                    for _, part in pairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then part.CanCollide = false end
+                    end
+                end
+            end
+            if not flying and not flingTargetEnabled then
+                local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    if hrp.Velocity.Magnitude > 100 then hrp.Velocity = Vector3.new(0, 0, 0) end
+                    if hrp.RotVelocity.Magnitude > 100 then hrp.RotVelocity = Vector3.new(0, 0, 0) end
+                end
+            end
+        end
+    end)
+
+    local currentTween = nil
+
+    b13.MouseButton1Click:Connect(function()
+        autoFarmCoins = not autoFarmCoins
+        b13.Text = autoFarmCoins and "Auto Farm: ON" or "Auto Farm: OFF"
+        b13.BackgroundColor3 = autoFarmCoins and themes[currentTheme].Primary or themes[currentTheme].ButtonBg
+        updateActiveCheatsList()
+        if not autoFarmCoins then
+            if currentTween then currentTween:Cancel() currentTween = nil end
+            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                plr.Character.Humanoid.PlatformStand = false
+            end
+        end
+    end)
+
+    task.spawn(function()
+        while true do
+            task.wait(0.05)
+            if autoFarmCoins and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = plr.Character.HumanoidRootPart
+                local hum = plr.Character:FindFirstChild("Humanoid")
+                local nearestCoin = nil
+                local shortestDistance = math.huge
+                
+                for _, v in pairs(workspace:GetDescendants()) do
+                    if v:IsA("BasePart") and (v.Name == "Coin_Server" or v.Name == "Coin" or v.Name:lower():find("coin")) then
+                        if v.Transparency < 1 and v.Parent then
+                            local dist = (hrp.Position - v.Position).Magnitude
+                            if dist < shortestDistance then
+                                shortestDistance = dist
+                                nearestCoin = v
+                            end
+                        end
+                    end
+                end
+                
+                if nearestCoin and autoFarmCoins then
+                    if hum then hum.PlatformStand = true end
+                    for _, part in pairs(plr.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then part.CanCollide = false end
+                    end
+                    local info = TweenInfo.new(shortestDistance / (farmSpeed * 10), Enum.EasingStyle.Linear)
+                    currentTween = tweenService:Create(hrp, info, {CFrame = nearestCoin.CFrame})
+                    currentTween:Play()
+                    currentTween.Completed:Wait()
+                end
+            end
+        end
+    end)
+end
+
+-- Obsługa przycisku zatwierdzania klucza
+keyBtn.MouseButton1Click:Connect(function()
+    showGameSelector()
 end)
